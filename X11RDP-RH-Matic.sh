@@ -1,14 +1,19 @@
 #!/bin/sh
 
 if [ $UID -eq 0 ] ; then
-	echo "${0}: Do not run this script root privilege."
+	echo "${0}:  Never run this utility as root."
 	echo
+	echo "This utility builds RPMs. Building RPM's as root is seriously dangerous."
 	echo "This script will gain root privileges via sudo on demand, then type your password."
 	exit 1
 fi
 
-if [ ! -x $(which sudo) ]; then
-	echo "${0}: "
+if [ ! -x "$(which sudo 2> /dev/null)" ]; then
+	echo "${0}: sudo not found."
+	echo
+	echo 'This utility requires sudo to gain root privileges on demand.'
+	echo 'run `yum -y install sudo` in root privileges before run this utility.'
+	exit 1
 fi
 
 LINE="----------------------------------------------------------------------"
