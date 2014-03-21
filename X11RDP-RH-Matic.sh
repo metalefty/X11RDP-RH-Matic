@@ -201,8 +201,18 @@ calc_cpu_cores()
 	makeCommand="make -j $jobs"
 }
 
-
 parse_commandline_args $@
+
+# first of all, check if yum-utils installed
+echo -n 'Checking for yum-utils... '
+if [ -x "$(which repoquery 2>/dev/null)" ]; then
+	echo 'yes'
+else
+	echo 'no'
+	echo -n 'Installing yum-utils...'
+	sudo yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1 
+fi
+
 install_depends $META_DEPENDS $FETCH_DEPENDS
 rpmdev_setuptree
 generate_spec
