@@ -24,15 +24,15 @@ GH_BRANCH=master
 GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
 
 WRKDIR=$(mktemp --directory)
-#WRKSRC=${WRKDIR}/${GH_PROJECT}
 YUM_LOG=${WRKDIR}/yum.log
+# variables for this utility
 META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
-XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel"
-X11RDP_BUILD_DEPENDS="autoconf automake libtool flex bison gcc gcc-c++ libxml2-python gettext perl-XML-Parser xorg-x11-font-utils libxslt"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff"
-CONFIGURE_ARGS="--enable-fuse"
+XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel"
+XRDP_CONFIGURE_ARGS="--enable-fuse"
 X11RDP_DESTDIR=/opt/X11rdp
+X11RDP_BUILD_DEPENDS="autoconf automake chrpath libtool flex bison gcc gcc-c++ libxml2-python gettext perl-XML-Parser xorg-x11-font-utils libxslt"
 
 error_exit() {
 	echo
@@ -90,7 +90,7 @@ generate_spec()
 	-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
 	-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
 	-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
-	-e "s/%%CONFIGURE_ARGS%%/${CONFIGURE_ARGS}/g" \
+	-e "s/%%CONFIGURE_ARGS%%/${XRDP_CONFIGURE_ARGS}/g" \
 	< SPECS/xrdp.spec.in > SPECS/xrdp.spec
 
 	echo 'done'
