@@ -18,6 +18,7 @@ fi
 
 LINE="----------------------------------------------------------------------"
 
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
 GH_ACCOUNT=neutrinolabs
 GH_PROJECT=xrdp
 GH_BRANCH=master
