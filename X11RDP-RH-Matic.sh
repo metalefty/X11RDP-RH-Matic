@@ -208,6 +208,27 @@ calc_cpu_cores()
 	makeCommand="make -j $jobs"
 }
 
+remove_installed_xrdp()
+{
+	# uninstall xrdp first if installed
+	for f in xrdp; do
+		echo -n "Removing installed $f..."
+			check_if_installed $f
+			if [ $? -eq 0 ]; then
+				sudo yum -y remove $f || error_exit
+			fi
+		echo "done"
+	done
+}
+
+install_built_xrdp()
+{
+	echo -n "Installing built xrdp..."
+	sudo yum -y localinstall \
+	$(rpm --eval %{_topdir}/RPMS/%{_arch}/xrdp-${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm)
+	echo "done"
+}
+
 parse_commandline_args $@
 
 # first of all, check if yum-utils installed
@@ -226,3 +247,5 @@ generate_spec
 fetch
 install_depends $XRDP_BUILD_DEPENDS $X11RDP_BUILD_DEPENDS
 build_rpm
+remove_installed_xrdp
+install_built_xrdp
