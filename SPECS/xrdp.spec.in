@@ -56,9 +56,17 @@ touch %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 %post
 # This adds the proper /etc/rc*.d links for the script
 /sbin/chkconfig --add %{name}
+/sbin/chkconfig %{name} on
 # generate RSA key pair
 xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini > /dev/null
 %{__chmod} 0600 %{_sysconfdir}/xrdp/rsakeys.ini
+/sbin/service %{name} start >/dev/null 2>&1 || :
+
+%preun
+if [ "$1" -eq "0" ] ; then
+    /sbin/chkconfig --del %{name}
+    /sbin/service %{name} stop >/dev/null 2>&1 || :
+fi
 
 %postun
 if [ "$1" -ge "1" ] ; then
