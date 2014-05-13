@@ -30,6 +30,7 @@ RDP server for Linux
 
 %prep
 %setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%
+%patch0
 
 %build
 ./bootstrap

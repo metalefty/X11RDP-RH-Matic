@@ -6,6 +6,6 @@
 -@include common-account
 -@include common-session
 -@include common-password
-+auth       include      password-auth
-+account    include      password-auth
-+session    include      password-auth
++auth       include      system-auth
++account    include      system-auth
++session    include      system-auth
