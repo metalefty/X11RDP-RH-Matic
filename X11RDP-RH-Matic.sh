@@ -75,7 +75,7 @@ calculate_version_num()
 	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep $GH_BRANCH | head -c7)
 	README=https://raw.github.com/${GH_ACCOUNT}/${GH_PROJECT}/${GH_BRANCH}/readme.txt
 	TMPFILE=$(mktemp)
-	wget --quiet -O $TMPFILE $README  || error_exit
+	wget --quiet --no-check-certificate -O $TMPFILE $README  || error_exit
 	VERSION=$(grep xrdp $TMPFILE | head -1 | cut -d " " -f2)
 	if [ "$(echo $VERSION | cut -c1)" != 'v' ]; then
 		VERSION=${VERSION}.git${GH_COMMIT}
