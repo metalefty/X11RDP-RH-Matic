@@ -8,7 +8,7 @@ if [ $UID -eq 0 ] ; then
 	exit 1
 fi
 
-if [ ! -x "$(which sudo 2> /dev/null)" ]; then
+if ! hash sudo ; then
 	echo "${0}: sudo not found."
 	echo
 	echo 'This utility requires sudo to gain root privileges on demand.'
@@ -30,7 +30,7 @@ YUM_LOG=${WRKDIR}/yum.log
 META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff"
-XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel"
+XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which"
 XRDP_CONFIGURE_ARGS="--enable-fuse"
 X11RDP_DESTDIR=/opt/X11rdp
 X11RDP_BUILD_DEPENDS="autoconf automake chrpath libtool flex bison gcc gcc-c++ libxml2-python gettext perl-XML-Parser xorg-x11-font-utils libxslt"
