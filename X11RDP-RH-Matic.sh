@@ -26,6 +26,8 @@ GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
 
 WRKDIR=$(mktemp --directory)
 YUM_LOG=${WRKDIR}/yum.log
+BUILD_LOG=${WRKDIR}/build.log
+RPMS_DIR=$(rpm --eval %{_rpmdir}/%{_arch})
 # variables for this utility
 META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
@@ -143,12 +145,14 @@ rpmdev_setuptree()
 
 build_rpm()
 {
+	echo -n 'Building rpms, please be patient... '
 	for f in $EXTRA_SOURCE; do
 		cp SOURCES/${f} $DISTDIR
 	done
 
-	rpmbuild -ba SPECS/xorg-x11-drv-rdp.spec
-	QA_RPATHS=$[0x0001] rpmbuild -ba SPECS/xrdp.spec
+	rpmbuild -ba SPECS/xorg-x11-drv-rdp.spec >> $BUILD_LOG 2>&1 || error_exit
+	QA_RPATHS=$[0x0001] rpmbuild -ba SPECS/xrdp.spec >> $BUILD_LOG 2>&1 || error_exit
+	echo 'done'
 }
 
 parse_commandline_args()
@@ -235,7 +239,7 @@ remove_installed_xrdp()
 {
 	# uninstall xrdp first if installed
 	for f in xrdp xorg-x11-drv-rdp; do
-		echo -n "Removing installed $f..."
+		echo -n "Removing installed $f... "
 			check_if_installed $f
 			if [ $? -eq 0 ]; then
 				sudo yum -y remove $f >>  $YUM_LOG || error_exit
