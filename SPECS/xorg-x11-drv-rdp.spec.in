@@ -14,7 +14,13 @@ Release:	1%{?dist}
 URL:		http://www.xrdp.org/
 Source0:	https://codeload.github.com/%%GH_ACCOUNT%%/%%GH_PROJECT%%/legacy.tar.gz/%%GH_COMMIT%%?dummy=/%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
 
-BuildRequires:	%%BUILDREQUIRES%%
+# Dependencies don't vary depending on build options
+Requires:	xorg-x11-server-Xorg
+BuildRequires:	make
+BuildRequires:	gcc
+BuildRequires:	pam-devel
+BuildRequires:	xorg-x11-server-devel
+
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
 %description
@@ -44,5 +50,4 @@ Xorg X11 rdp driver for xrdp
 %{driverdir}/xrdpdev_drv.so
 %{inputdir}/xrdpmouse_drv.so
 %{inputdir}/xrdpkeyb_drv.so
-%{xrdpxorgconfdir}
 %{xrdpxorgconfdir}/xorg.conf
