@@ -246,22 +246,26 @@ remove_installed_xrdp()
 
 install_built_xrdp()
 {
-	echo -n "Installing built xrdp..."
-	sudo yum -y localinstall \
-	$(rpm --eval %{_topdir}/RPMS/%{_arch}/xrdp-${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm) \
-	$(rpm --eval %{_topdir}/RPMS/%{_arch}/xorg-x11-drv-rdp-${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm) \
-	>> $YUM_LOG && echo "done" || error_exit
+	RPM_VERSION_SUFFIX=$(rpm --eval -${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm)
+
+	for f in xrdp xorg-x11-drv-rdp; do
+		echo -n "Installing built $f... "
+		sudo yum -y localinstall \
+			${RPMS_DIR}/${f}${RPM_VERSION_SUFFIX} \
+			>> $YUM_LOG && echo "done" || error_exit
+	done
 }
 
 parse_commandline_args $@
 
 # first of all, check if yum-utils installed
+echo 'First of all, checking for necessary programs to run this script... '
 echo -n 'Checking for yum-utils... '
-if [ -x "$(which repoquery 2>/dev/null)" ]; then
+if hash repoquery; then
 	echo 'yes'
 else
 	echo 'no'
-	echo -n 'Installing yum-utils...'
+	echo -n 'Installing yum-utils... '
 	sudo yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1 
 fi
 
