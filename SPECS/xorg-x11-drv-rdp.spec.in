@@ -27,7 +27,7 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 Xorg X11 rdp driver for xrdp
 
 %prep
-%setup -q -n neutrinolabs-xrdp-b30e5ca/xorg/server
+%setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/xorg/server
 
 %build
 %{__make}
