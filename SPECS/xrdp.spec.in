@@ -14,7 +14,20 @@ Source3:	xrdp.logrotate
 
 Patch0:		xrdp-pam-auth.patch
 
+# Basic dependensies
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool
+BuildRequires:	openssl-devel
+BuildRequires:	pam-devel
+BuildRequires:	libX11-devel
+BuildRequires:	libXfixes-devel
+BuildRequires:	libXrandr-devel
+BuildRequires:	fuse-devel
+BuildRequires:	which
+# Additional dependencies which vary on depending on build options
 BuildRequires:	%%BUILDREQUIRES%%
+
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
 #initscripts requires
@@ -97,5 +110,3 @@ rm -rf %{buildroot}
 %{_sysconfdir}/*
 %{_initrddir}
 %attr(0600,root,root) %verify(not size md5 mtime) %{_sysconfdir}/xrdp/rsakeys.ini
-
-
