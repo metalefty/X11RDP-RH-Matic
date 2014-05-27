@@ -150,14 +150,20 @@ rpmdev_setuptree()
 
 build_rpm()
 {
-	echo -n 'Building rpms, please be patient... '
+	echo 'Building RPMs started, please be patient... '
 	for f in $EXTRA_SOURCE; do
 		cp SOURCES/${f} $DISTDIR
 	done
 
-	rpmbuild -ba SPECS/xorg-x11-drv-rdp.spec >> $BUILD_LOG 2>&1 || error_exit
-	QA_RPATHS=$[0x0001] rpmbuild -ba SPECS/xrdp.spec >> $BUILD_LOG 2>&1 || error_exit
-	echo 'done'
+	for f in $TARGETS; do
+		echo -n "Building ${f}..."
+		if [ "$f" = "xrdp" ]; then
+			QA_RPATHS=$[0x0001] rpmbuild -ba SPECS/${f}.spec >> $BUILD_LOG 2>&1 || error_exit
+		else
+			rpmbuild -ba SPECS/${f}.spec >> $BUILD_LOG 2>&1 || error_exit
+		fi
+		echo 'done'
+	done
 }
 
 parse_commandline_args()
@@ -244,10 +250,10 @@ calc_cpu_cores()
 
 remove_installed_xrdp()
 {
-	[ "$NOINSTALL" -eq 1 ] && return
+	[ "$NOINSTALL" = "1" ] && return
 
 	# uninstall xrdp first if installed
-	for f in xrdp xorg-x11-drv-rdp; do
+	for f in $TARGETS ; do
 		echo -n "Removing installed $f... "
 			check_if_installed $f
 			if [ $? -eq 0 ]; then
@@ -259,11 +265,11 @@ remove_installed_xrdp()
 
 install_built_xrdp()
 {
-	[ "$NOINSTALL" -eq 1 ] && return
+	[ "$NOINSTALL" = "1" ] && return
 
 	RPM_VERSION_SUFFIX=$(rpm --eval -${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm)
 
-	for f in xrdp xorg-x11-drv-rdp; do
+	for f in $TARGETS ; do
 		echo -n "Installing built $f... "
 		sudo yum -y localinstall \
 			${RPMS_DIR}/${f}${RPM_VERSION_SUFFIX} \
