@@ -1,5 +1,6 @@
 *~
 *.sw?
 *.un~
+*.bak
 SPECS/*.spec
 !SPECS/*.spec.in

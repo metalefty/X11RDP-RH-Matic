@@ -26,14 +26,18 @@ GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
 
 WRKDIR=$(mktemp --directory)
 YUM_LOG=${WRKDIR}/yum.log
+BUILD_LOG=${WRKDIR}/build.log
+RPMS_DIR=$(rpm --eval %{_rpmdir}/%{_arch})
 # variables for this utility
 META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff"
 XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which"
 XRDP_CONFIGURE_ARGS="--enable-fuse"
-X11RDP_DESTDIR=/opt/X11rdp
-X11RDP_BUILD_DEPENDS="autoconf automake chrpath libtool flex bison gcc gcc-c++ libxml2-python gettext perl-XML-Parser xorg-x11-font-utils libxslt"
+
+# xorg driver
+XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-rdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
+
 
 error_exit() {
 	echo
@@ -89,15 +93,30 @@ generate_spec()
 	calculate_version_num
 	calc_cpu_cores
 	echo -n 'Generating RPM spec files... '
-	sed \
-	-e "s/%%XRDPVER%%/${VERSION}/g" \
+
+	#read # DEBUG
+	#echo SPECS/*.spec.in #DEBUG 
+
+	# replace common variables in spec templates
+	for f in SPECS/*.spec.in
+	do    
+		sed \
+		-e "s/%%XRDPVER%%/${VERSION}/g" \
+		-e "s/%%XRDPBRANCH%%/${GH_BRANCH}/g" \
+		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
+		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
+		-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
+		< $f > $(echo $f | sed 's|.in$||') || error_exit
+	done 
+
+	sed -i.bak \
+	-e "s/%%BUILDREQUIRES%%/${XORG_DRIVER_BUILD_DEPENDS}/" \
+	SPECS/xorg-x11-drv-rdp.spec || error_exit
+
+	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XRDP_BUILD_DEPENDS}/g" \
-	-e "s/%%XRDPBRANCH%%/${GH_BRANCH}/g" \
-	-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
-	-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
-	-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
 	-e "s/%%CONFIGURE_ARGS%%/${XRDP_CONFIGURE_ARGS}/g" \
-	< SPECS/xrdp.spec.in > SPECS/xrdp.spec
+	SPECS/xrdp.spec ||  error_exit
 
 	echo 'done'
 }
@@ -126,11 +145,14 @@ rpmdev_setuptree()
 
 build_rpm()
 {
+	echo -n 'Building rpms, please be patient... '
 	for f in $EXTRA_SOURCE; do
 		cp SOURCES/${f} $DISTDIR
 	done
 
-	QA_RPATHS=$[0x0001] rpmbuild -ba SPECS/xrdp.spec
+	rpmbuild -ba SPECS/xorg-x11-drv-rdp.spec >> $BUILD_LOG 2>&1 || error_exit
+	QA_RPATHS=$[0x0001] rpmbuild -ba SPECS/xrdp.spec >> $BUILD_LOG 2>&1 || error_exit
+	echo 'done'
 }
 
 parse_commandline_args()
@@ -216,11 +238,11 @@ calc_cpu_cores()
 remove_installed_xrdp()
 {
 	# uninstall xrdp first if installed
-	for f in xrdp; do
-		echo -n "Removing installed $f..."
+	for f in xrdp xorg-x11-drv-rdp; do
+		echo -n "Removing installed $f... "
 			check_if_installed $f
 			if [ $? -eq 0 ]; then
-				sudo yum -y remove $f || error_exit
+				sudo yum -y remove $f >>  $YUM_LOG || error_exit
 			fi
 		echo "done"
 	done
@@ -228,21 +250,26 @@ remove_installed_xrdp()
 
 install_built_xrdp()
 {
-	echo -n "Installing built xrdp..."
-	sudo yum -y localinstall \
-	$(rpm --eval %{_topdir}/RPMS/%{_arch}/xrdp-${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm)
-	echo "done"
+	RPM_VERSION_SUFFIX=$(rpm --eval -${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm)
+
+	for f in xrdp xorg-x11-drv-rdp; do
+		echo -n "Installing built $f... "
+		sudo yum -y localinstall \
+			${RPMS_DIR}/${f}${RPM_VERSION_SUFFIX} \
+			>> $YUM_LOG && echo "done" || error_exit
+	done
 }
 
 parse_commandline_args $@
 
 # first of all, check if yum-utils installed
+echo 'First of all, checking for necessary programs to run this script... '
 echo -n 'Checking for yum-utils... '
-if [ -x "$(which repoquery 2>/dev/null)" ]; then
+if hash repoquery; then
 	echo 'yes'
 else
 	echo 'no'
-	echo -n 'Installing yum-utils...'
+	echo -n 'Installing yum-utils... '
 	sudo yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1 
 fi
 
@@ -250,7 +277,7 @@ install_depends $META_DEPENDS $FETCH_DEPENDS
 rpmdev_setuptree
 generate_spec
 fetch
-install_depends $XRDP_BUILD_DEPENDS $X11RDP_BUILD_DEPENDS
+install_depends $XRDP_BUILD_DEPENDS $X11RDP_BUILD_DEPENDS $XORG_DRIVER_DEPENDS
 build_rpm
 remove_installed_xrdp
 install_built_xrdp
