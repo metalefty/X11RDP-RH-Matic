@@ -19,6 +19,8 @@ fi
 LINE="----------------------------------------------------------------------"
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+# xrdp repository
 GH_ACCOUNT=neutrinolabs
 GH_PROJECT=xrdp
 GH_BRANCH=master
@@ -28,7 +30,10 @@ WRKDIR=$(mktemp --directory)
 YUM_LOG=${WRKDIR}/yum.log
 BUILD_LOG=${WRKDIR}/build.log
 RPMS_DIR=$(rpm --eval %{_rpmdir}/%{_arch})
+
+
 # variables for this utility
+TARGETS="xrdp"
 META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff"
@@ -95,11 +100,11 @@ generate_spec()
 	echo -n 'Generating RPM spec files... '
 
 	#read # DEBUG
-	#echo SPECS/*.spec.in #DEBUG 
+	#echo SPECS/*.spec.in #DEBUG
 
 	# replace common variables in spec templates
 	for f in SPECS/*.spec.in
-	do    
+	do
 		sed \
 		-e "s/%%XRDPVER%%/${VERSION}/g" \
 		-e "s/%%XRDPBRANCH%%/${GH_BRANCH}/g" \
@@ -107,7 +112,7 @@ generate_spec()
 		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
 		-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
 		< $f > $(echo $f | sed 's|.in$||') || error_exit
-	done 
+	done
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XORG_DRIVER_BUILD_DEPENDS}/" \
@@ -123,7 +128,7 @@ generate_spec()
 
 fetch() {
 	DISTDIR=$(rpm --eval '%{_sourcedir}')
-	DISTFILE=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}.tar.gz 
+	DISTFILE=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}.tar.gz
 	echo -n 'Fetching source code... '
 	if [ ! -f ${DISTDIR}/${DISTFILE} ]; then
 		wget \
@@ -165,7 +170,6 @@ parse_commandline_args()
 OPTIONS
 -------
   --help             : show this help.
-  --justdoit         : perform a complete compile and install with sane defaults and no user interaction.
   --branch <branch>  : use one of the available xrdp branches listed above...
                        Examples:
                        --branch v0.8    - use the 0.8 branch.
@@ -176,23 +180,15 @@ OPTIONS
   --nocpuoptimize    : do not change X11rdp build script to utilize more than 1 of your CPU cores.
   --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
   --noinstall        : do not install anything, just build the packages
-  --nox11rdp         : only build xrdp, do not build the x11rdp backend
   --withjpeg         : include jpeg module
-  --withsound        : include building of the simple pulseaudio interface
-  --withdebug        : build with debug enabled
-  --withneutrino     : build the neutrinordp module
-  --withkerberos     : build support for kerberos
-  --withxrdpvr       : build the xrdpvr module
-  --withnopam        : don't include PAM support
-  --withpamuserpass  : build with pam userpass support
-  --withfreerdp      : build the freerdp1 module"
+  --with-xorg-driver : build and install xorg-driver"
 		get_branches
 		exit
 	fi
 
 	while [ $# -gt 0 ]; do
 	case "$1" in
-		--branch)
+	--branch)
 		get_branches
 		if [ $(expr "$BRANCHES" : ".*${2}.*") -ne 0 ]; then
 			GH_BRANCH=$2
@@ -200,7 +196,7 @@ OPTIONS
 			echo "**** Error detected in branch selection. Argument after --branch was : $2 ."
 			echo "**** Available branches : "$BRANCHES
 			exit 1
-		fi	
+		fi
 		echo "Using branch ==>> $GH_BRANCH <<=="
 		if [ $GH_BRANCH = 'devel' ]; then
 			echo "Note : using the bleeding-edge version may result in problems :)"
@@ -208,7 +204,18 @@ OPTIONS
 		echo $LINE
 		shift
 		;;
-		--withjpeg)
+
+	--noinstall)
+		NOINSTALL=1
+		shift
+		;;
+
+	--with-xorg-driver)
+		TARGETS="$TARGETS xorg-x11-drv-rdp"
+		shift
+		;;
+
+	--withjpeg)
 		CONFIGURE_ARGS="$CONFIGURE_ARGS --enable-jpeg"
 		XRDP_BUILD_DEPENDS="$XRDP_BUILD_DEPENDS libjpeg-devel"
 		shift
@@ -237,6 +244,8 @@ calc_cpu_cores()
 
 remove_installed_xrdp()
 {
+	[ "$NOINSTALL" -eq 1 ] && return
+
 	# uninstall xrdp first if installed
 	for f in xrdp xorg-x11-drv-rdp; do
 		echo -n "Removing installed $f... "
@@ -250,6 +259,8 @@ remove_installed_xrdp()
 
 install_built_xrdp()
 {
+	[ "$NOINSTALL" -eq 1 ] && return
+
 	RPM_VERSION_SUFFIX=$(rpm --eval -${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm)
 
 	for f in xrdp xorg-x11-drv-rdp; do
@@ -259,6 +270,10 @@ install_built_xrdp()
 			>> $YUM_LOG && echo "done" || error_exit
 	done
 }
+
+#
+#  main routines
+#
 
 parse_commandline_args $@
 
@@ -270,7 +285,7 @@ if hash repoquery; then
 else
 	echo 'no'
 	echo -n 'Installing yum-utils... '
-	sudo yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1 
+	sudo yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1
 fi
 
 install_depends $META_DEPENDS $FETCH_DEPENDS
