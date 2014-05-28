@@ -1,0 +1,39 @@
+%define	xrdpver		%%XRDPVER%%
+%define	xrdpbranch	%%XRDPBRANCH%%
+
+Summary:	X11rdp backend for xrdp remote access server
+Name:		x11rdp
+Version:	%{xrdpver}+%{xrdpbranch}
+License:	MIT
+Release:	1%{?dist}
+URL:		http://www.xrdp.org/
+Source0:	https://codeload.github.com/%%GH_ACCOUNT%%/%%GH_PROJECT%%/legacy.tar.gz/%%GH_COMMIT%%?dummy=/%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
+
+Patch0:		buildx_patch.diff
+
+AutoReq:	no
+BuildRequires:	autoconf automake chrpath libtool flex bison gcc gcc-c++ libxml2-python gettext perl-XML-Parser xorg-x11-font-utils libxslt
+BuildRoot:	%{_tmppath}/%{name}-%{version}-root
+
+%description
+X11rdp backend for xrdp remote access server
+
+%build
+#%%X11RDPBASE%%
+%{__rm} -rf %{_builddir}
+%{__mkdir} -p %{_builddir}%%X11RDPBASE%%
+%{__cp} -rp %%X11RDPBASE%%/* %{_builddir}%%X11RDPBASE%%
+
+%install
+%{__mkdir} -p %{buildroot}/usr/bin %{buildroot}%%X11RDPBASE%%
+%{__cp} -rp %{_builddir}%%X11RDPBASE%%/* %{buildroot}%%X11RDPBASE%%
+find %{buildroot}%%X11RDPBASE%%/var/cache -delete
+ln -s %%X11RDPBASE%%/bin/X11rdp %{buildroot}/usr/bin
+
+%clean
+%{__rm} -rf %{buildroot}
+
+%files
+%defattr(-,root,root)
+%%X11RDPBASE%%
+%{_bindir}/X11rdp

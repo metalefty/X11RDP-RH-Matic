@@ -26,6 +26,7 @@ GH_PROJECT=xrdp
 GH_BRANCH=master
 GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
 
+
 WRKDIR=$(mktemp --directory)
 YUM_LOG=${WRKDIR}/yum.log
 BUILD_LOG=${WRKDIR}/build.log
@@ -33,7 +34,7 @@ RPMS_DIR=$(rpm --eval %{_rpmdir}/%{_arch})
 
 
 # variables for this utility
-TARGETS="xrdp"
+TARGETS="xrdp x11rdp"
 META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff"
@@ -123,12 +124,18 @@ generate_spec()
 	-e "s/%%CONFIGURE_ARGS%%/${XRDP_CONFIGURE_ARGS}/g" \
 	SPECS/xrdp.spec ||  error_exit
 
+	sed -i.bak \
+	-e "s|%%X11RDPBASE%%|/opt/X11rdp|g" \
+	-e "s|make -j1|${makeCommand}|g" \
+	SPECS/x11rdp.spec || error_exit
+
 	echo 'done'
 }
 
 fetch() {
 	DISTDIR=$(rpm --eval '%{_sourcedir}')
-	DISTFILE=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}.tar.gz
+	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
+	DISTFILE=${WRKSRC}.tar.gz
 	echo -n 'Fetching source code... '
 	if [ ! -f ${DISTDIR}/${DISTFILE} ]; then
 		wget \
@@ -138,6 +145,41 @@ fetch() {
 		echo 'done'
 	else
 		echo 'already exists'
+	fi
+}
+
+x11rdp_dirty_build()
+{
+	X11RDPBASE=/opt/X11rdp
+	# remove installed x11rdp before build x11rdp
+	check_if_installed x11rdp
+	if [ $? -eq 0 ]; then
+		sudo yum -y remove x11rdp >> $YUM_LOG || error_exit
+	fi
+
+	# clean /opt/X11rdp
+	if [ -d $X11RDPBASE ]; then
+	 sudo find $X11RDPBASE -delete
+	fi
+	
+	tar zxf ${DISTDIR}/${DISTFILE} -C $WRKDIR || error_exit
+	(
+	cd ${WRKDIR}/${WRKSRC}/xorg/X11R7.6 && \
+	patch -p2 < ${DISTDIR}/buildx_patch.diff >> $BUILD_LOG 2>&1 && \
+	sed -i.bak \
+		-e 's/if ! mkdir $PREFIX_DIR/if ! mkdir -p $PREFIX_DIR/' \
+		-e 's/make -j 1/make -j 2/g' \
+		-e 's|^download_url=http://server1.xrdp.org/xrdp/X11R7.6|download_url=http://www.club.kyutech.ac.jp/~meta/distfiles/xrdp/X11R7.6|' \
+		buildx.sh >> $BUILD_LOG 2>&1 && \
+	sudo ./buildx.sh $X11RDPBASE >> $BUILD_LOG 2>&1 || \
+	error_exit
+	)
+
+	QA_RPATHS=$[0x0001|0x0002] rpmbuild -ba SPECS/x11rdp.spec >> $BUILD_LOG 2>&1 || error_exit
+
+	# cleanup installed files during the build
+	if [ -d $X11RDPBASE ]; then 
+		sudo find $X11RDPBASE -delete
 	fi
 }
 
@@ -157,11 +199,11 @@ build_rpm()
 
 	for f in $TARGETS; do
 		echo -n "Building ${f}..."
-		if [ "$f" = "xrdp" ]; then
-			QA_RPATHS=$[0x0001] rpmbuild -ba SPECS/${f}.spec >> $BUILD_LOG 2>&1 || error_exit
-		else
-			rpmbuild -ba SPECS/${f}.spec >> $BUILD_LOG 2>&1 || error_exit
-		fi
+		case "${f}" in
+			xrdp) QA_RPATHS=$[0x0001] rpmbuild -ba SPECS/${f}.spec >> $BUILD_LOG 2>&1 || error_exit ;;
+			x11rdp) x11rdp_dirty_build || error_exit ;;
+			*) rpmbuild -ba SPECS/${f}.spec >> $BUILD_LOG 2>&1 || error_exit ;;
+		esac
 		echo 'done'
 	done
 }
