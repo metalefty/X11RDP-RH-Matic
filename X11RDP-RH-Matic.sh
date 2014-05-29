@@ -291,7 +291,7 @@ OPTIONS
 		;;
 
 	--withjpeg)
-		CONFIGURE_ARGS="$CONFIGURE_ARGS --enable-jpeg"
+		XRDP_CONFIGURE_ARGS="$XRDPCONFIGURE_ARGS --enable-jpeg"
 		XRDP_BUILD_DEPENDS="$XRDP_BUILD_DEPENDS libjpeg-devel"
 		shift
 		;;
