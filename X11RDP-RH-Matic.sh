@@ -1,4 +1,5 @@
 #!/bin/sh
+# vim:ts=2:sw=2:sts=0
 
 if [ $UID -eq 0 ] ; then
 	echo "${0}:  Never run this utility as root."
