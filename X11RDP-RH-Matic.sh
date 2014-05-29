@@ -249,6 +249,7 @@ OPTIONS
   --nocpuoptimize    : do not change X11rdp build script to utilize more than 1 of your CPU cores.
   --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
   --noinstall        : do not install anything, just build the packages
+  --nox11rdp         : do not build and install x11rdp
   --withjpeg         : include jpeg module
   --with-xorg-driver : build and install xorg-driver"
 		get_branches
@@ -276,6 +277,11 @@ OPTIONS
 
 	--noinstall)
 		NOINSTALL=1
+		shift
+		;;
+
+	--nox11rdp)
+		TARGETS=${TARGETS//x11rdp/}
 		shift
 		;;
 
