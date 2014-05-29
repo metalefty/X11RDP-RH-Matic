@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+trap user_interrupt_exit 2
 
 if [ $UID -eq 0 ] ; then
 	echo "${0}:  Never run this utility as root."
@@ -26,12 +27,11 @@ GH_PROJECT=xrdp
 GH_BRANCH=master
 GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
 
-
 WRKDIR=$(mktemp --directory)
 YUM_LOG=${WRKDIR}/yum.log
 BUILD_LOG=${WRKDIR}/build.log
+SUDO_LOG=${WRKDIR}/sudo.log
 RPMS_DIR=$(rpm --eval %{_rpmdir}/%{_arch})
-
 
 # variables for this utility
 TARGETS="xrdp x11rdp"
@@ -44,10 +44,30 @@ XRDP_CONFIGURE_ARGS="--enable-fuse"
 # xorg driver
 XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-rdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
 
+SUDO_CMD() {
+	# sudo's password prompt timeouts 5 minutes by most default settings
+	# to avoid exit this script because of sudo timeout
+	echo 1>&2
+	echo "Following command will be executed via sudo:" | tee -a $SUDO_LOG $1>&2
+	echo "	$@" | tee -a $SUDO_LOG 1>&2
+	while ! sudo -v; do :; done
+	sudo $@ | tee -a $SUDO_LOG
+}
 
 error_exit() {
-	echo
-	echo 'Oops, something going wrong. exitting...'
+	echo 2>&1; echo 2>&1
+	echo "Oops, something going wrong around line: $BASH_LINENO" 1>&2
+	echo "See logs to get further information:" 1>&2
+	echo "	$BUILD_LOG" 1>&2
+	echo "	$SUDO_LOG" 1>&2
+	echo "	$YUM_LOG" 1>&2
+	echo "Exitting..." 1>&2
+	exit 1
+}
+
+user_interrupt_exit() {
+	echo; echo
+	echo "Script stopped due to user interrupt, exitting..."
 	exit 1
 }
 
@@ -59,13 +79,13 @@ install_depends() {
 			echo "yes"
 			if [ $f = "wget" ]; then
 				echo -n "Updating ${f}... "
-				sudo yum -y update $f >> $YUM_LOG || error_exit
+				SUDO_CMD yum -y update $f >> $YUM_LOG || error_exit
 				echo "done"
 			fi
 		else
 			echo "no"
 			echo -n "Installing $f... "
-			sudo yum -y install $f >> $YUM_LOG && echo "done" || error_exit
+			SUDO_CMD yum -y install $f >> $YUM_LOG && echo "done" || error_exit
 		fi
 		sleep 0.1
 	done
@@ -154,12 +174,12 @@ x11rdp_dirty_build()
 	# remove installed x11rdp before build x11rdp
 	check_if_installed x11rdp
 	if [ $? -eq 0 ]; then
-		sudo yum -y remove x11rdp >> $YUM_LOG || error_exit
+		SUDO_CMD yum -y remove x11rdp >> $YUM_LOG || error_exit
 	fi
 
 	# clean /opt/X11rdp
 	if [ -d $X11RDPBASE ]; then
-	 sudo find $X11RDPBASE -delete
+		SUDO_CMD find $X11RDPBASE -delete
 	fi
 	
 	tar zxf ${DISTDIR}/${DISTFILE} -C $WRKDIR || error_exit
@@ -171,7 +191,7 @@ x11rdp_dirty_build()
 		-e 's/make -j 1/make -j 2/g' \
 		-e 's|^download_url=http://server1.xrdp.org/xrdp/X11R7.6|download_url=http://www.club.kyutech.ac.jp/~meta/distfiles/xrdp/X11R7.6|' \
 		buildx.sh >> $BUILD_LOG 2>&1 && \
-	sudo ./buildx.sh $X11RDPBASE >> $BUILD_LOG 2>&1 || \
+	SUDO_CMD ./buildx.sh $X11RDPBASE >> $BUILD_LOG 2>&1 || \
 	error_exit
 	)
 
@@ -179,7 +199,7 @@ x11rdp_dirty_build()
 
 	# cleanup installed files during the build
 	if [ -d $X11RDPBASE ]; then 
-		sudo find $X11RDPBASE -delete
+		SUDO_CMD find $X11RDPBASE -delete
 	fi
 }
 
@@ -299,7 +319,7 @@ remove_installed_xrdp()
 		echo -n "Removing installed $f... "
 			check_if_installed $f
 			if [ $? -eq 0 ]; then
-				sudo yum -y remove $f >>  $YUM_LOG || error_exit
+				SUDO_CMD yum -y remove $f >>  $YUM_LOG || error_exit
 			fi
 		echo "done"
 	done
@@ -313,7 +333,7 @@ install_built_xrdp()
 
 	for f in $TARGETS ; do
 		echo -n "Installing built $f... "
-		sudo yum -y localinstall \
+		SUDO_CMD yum -y localinstall \
 			${RPMS_DIR}/${f}${RPM_VERSION_SUFFIX} \
 			>> $YUM_LOG && echo "done" || error_exit
 	done
@@ -333,7 +353,7 @@ if hash repoquery; then
 else
 	echo 'no'
 	echo -n 'Installing yum-utils... '
-	sudo yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1
+	SUDO_CMD yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1
 fi
 
 install_depends $META_DEPENDS $FETCH_DEPENDS
