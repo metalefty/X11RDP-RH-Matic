@@ -42,8 +42,10 @@ EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx
 XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which"
 XRDP_CONFIGURE_ARGS="--enable-fuse"
 
-# xorg driver
+# xorg driver build/run dependencies
 XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-rdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
+# x11rdp
+X11RDP_BUILD_DEPENDS=$(<SPECS/x11rdp.spec.in grep BuildRequires: | awk '{ print $2 }')
 
 SUDO_CMD() {
 	# sudo's password prompt timeouts 5 minutes by most default settings
@@ -341,6 +343,16 @@ install_built_xrdp()
 	done
 }
 
+install_targets_depends(){
+	for t in $TARGETS; do
+		case "$t" in
+			xrdp) install_depends $XRDP_BUILD_DEPENDS ;;
+			x11rdp) install_depends $X11RDP_BUILD_DEPENDS ;;
+			xorg-x11-drv-rdp) install_depends $XORG_DRIVER_DEPENDS ;;
+		esac
+	done
+}
+
 #
 #  main routines
 #
@@ -362,7 +374,7 @@ install_depends $META_DEPENDS $FETCH_DEPENDS
 rpmdev_setuptree
 generate_spec
 fetch
-install_depends $XRDP_BUILD_DEPENDS $X11RDP_BUILD_DEPENDS $XORG_DRIVER_DEPENDS
+install_targets_depends
 build_rpm
 remove_installed_xrdp
 install_built_xrdp

@@ -12,7 +12,18 @@ Source0:	https://codeload.github.com/%%GH_ACCOUNT%%/%%GH_PROJECT%%/legacy.tar.gz
 Patch0:		buildx_patch.diff
 
 AutoReq:	no
-BuildRequires:	autoconf automake chrpath libtool flex bison gcc gcc-c++ libxml2-python gettext perl-XML-Parser xorg-x11-font-utils libxslt
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool
+BuildRequires:	flex
+BuildRequires:	bison
+BuildRequires:	gcc
+BuildRequires:	gcc-c++
+BuildRequires:	gettext
+BuildRequires:	libxslt
+BuildRequires:	xorg-x11-font-utils
+BuildRequires:	perl-XML-Parser
+
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
 %description
