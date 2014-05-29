@@ -49,7 +49,7 @@ SUDO_CMD() {
 	# sudo's password prompt timeouts 5 minutes by most default settings
 	# to avoid exit this script because of sudo timeout
 	echo 1>&2
-	echo "Following command will be executed via sudo:" | tee -a $SUDO_LOG $1>&2
+	echo "Following command will be executed via sudo:" | tee -a $SUDO_LOG 1>&2
 	echo "	$@" | tee -a $SUDO_LOG 1>&2
 	while ! sudo -v; do :; done
 	sudo $@ | tee -a $SUDO_LOG
