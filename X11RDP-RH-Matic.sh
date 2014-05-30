@@ -257,46 +257,41 @@ OPTIONS
 	fi
 
 	while [ $# -gt 0 ]; do
-	case "$1" in
-	--branch)
-		get_branches
-		if [ $(expr "$BRANCHES" : ".*${2}.*") -ne 0 ]; then
-			GH_BRANCH=$2
-		else
-			echo "**** Error detected in branch selection. Argument after --branch was : $2 ."
-			echo "**** Available branches : "$BRANCHES
-			exit 1
-		fi
-		echo "Using branch ==>> $GH_BRANCH <<=="
-		if [ $GH_BRANCH = 'devel' ]; then
-			echo "Note : using the bleeding-edge version may result in problems :)"
-		fi
-		echo $LINE
-		shift
-		;;
+		case "$1" in
+		--branch)
+			get_branches
+			if [ $(expr "$BRANCHES" : ".*${2}.*") -ne 0 ]; then
+				GH_BRANCH=$2
+			else
+				echo "**** Error detected in branch selection. Argument after --branch was : $2 ."
+				echo "**** Available branches : "$BRANCHES
+				exit 1
+			fi
+			echo "Using branch ==>> $GH_BRANCH <<=="
+			if [ $GH_BRANCH = 'devel' ]; then
+				echo "Note : using the bleeding-edge version may result in problems :)"
+			fi
+			echo $LINE
+			;;
 
-	--noinstall)
-		NOINSTALL=1
-		shift
-		;;
+		--noinstall)
+			NOINSTALL=1
+			;;
 
-	--nox11rdp)
-		TARGETS=${TARGETS//x11rdp/}
-		shift
-		;;
+		--nox11rdp)
+			TARGETS=${TARGETS//x11rdp/}
+			;;
 
-	--with-xorg-driver)
-		TARGETS="$TARGETS xorg-x11-drv-rdp"
-		shift
-		;;
+		--with-xorg-driver)
+			TARGETS="$TARGETS xorg-x11-drv-rdp"
+			;;
 
-	--withjpeg)
-		XRDP_CONFIGURE_ARGS="$XRDPCONFIGURE_ARGS --enable-jpeg"
-		XRDP_BUILD_DEPENDS="$XRDP_BUILD_DEPENDS libjpeg-devel"
+		--withjpeg)
+			XRDP_CONFIGURE_ARGS="$XRDPCONFIGURE_ARGS --enable-jpeg"
+			XRDP_BUILD_DEPENDS="$XRDP_BUILD_DEPENDS libjpeg-devel"
+			;;
+		esac
 		shift
-		;;
-	esac
-	shift
 	done
 }
 
