@@ -135,22 +135,22 @@ generate_spec()
 		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
 		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
 		-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
-		< $f > $(echo $f | sed 's|.in$||') || error_exit
+		< $f > ${WRKDIR}/$(basename ${f%.in}) || error_exit
 	done
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XORG_DRIVER_BUILD_DEPENDS}/" \
-	SPECS/xorg-x11-drv-rdp.spec || error_exit
+	${WRKDIR}/xorg-x11-drv-rdp.spec || error_exit
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XRDP_BUILD_DEPENDS}/g" \
 	-e "s/%%CONFIGURE_ARGS%%/${XRDP_CONFIGURE_ARGS}/g" \
-	SPECS/xrdp.spec ||  error_exit
+	${WRKDIR}/xrdp.spec ||  error_exit
 
 	sed -i.bak \
 	-e "s|%%X11RDPBASE%%|/opt/X11rdp|g" \
 	-e "s|make -j1|${makeCommand}|g" \
-	SPECS/x11rdp.spec || error_exit
+	${WRKDIR}/x11rdp.spec || error_exit
 
 	echo 'done'
 }
@@ -198,7 +198,7 @@ x11rdp_dirty_build()
 	error_exit
 	)
 
-	QA_RPATHS=$[0x0001|0x0002] rpmbuild -ba SPECS/x11rdp.spec >> $BUILD_LOG 2>&1 || error_exit
+	QA_RPATHS=$[0x0001|0x0002] rpmbuild -ba ${WRKDIR}/x11rdp.spec >> $BUILD_LOG 2>&1 || error_exit
 
 	# cleanup installed files during the build
 	if [ -d $X11RDPBASE ]; then 
@@ -223,9 +223,9 @@ build_rpm()
 	for f in $TARGETS; do
 		echo -n "Building ${f}..."
 		case "${f}" in
-			xrdp) QA_RPATHS=$[0x0001] rpmbuild -ba SPECS/${f}.spec >> $BUILD_LOG 2>&1 || error_exit ;;
+			xrdp) QA_RPATHS=$[0x0001] rpmbuild -ba ${WRKDIR}/${f}.spec >> $BUILD_LOG 2>&1 || error_exit ;;
 			x11rdp) x11rdp_dirty_build || error_exit ;;
-			*) rpmbuild -ba SPECS/${f}.spec >> $BUILD_LOG 2>&1 || error_exit ;;
+			*) rpmbuild -ba ${WRKDIR}/${f}.spec >> $BUILD_LOG 2>&1 || error_exit ;;
 		esac
 		echo 'done'
 	done
