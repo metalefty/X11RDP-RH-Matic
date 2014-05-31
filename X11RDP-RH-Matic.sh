@@ -353,23 +353,30 @@ install_targets_depends(){
 	done
 }
 
+first_of_all() {
+	clear
+	echo 'Allow X11RDP-RH-Matic to gain root privileges.'
+	echo 'Type your password if required.'
+	sudo -v
+
+	# first of all, check if yum-utils installed
+	echo 'First of all, checking for necessary programs to run this script... '
+	echo -n 'Checking for yum-utils... '
+	if hash repoquery; then
+		echo 'yes'
+	else
+		echo 'no'
+		echo -n 'Installing yum-utils... '
+		SUDO_CMD yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1
+	fi
+}
+
 #
 #  main routines
 #
 
 parse_commandline_args $@
-
-# first of all, check if yum-utils installed
-echo 'First of all, checking for necessary programs to run this script... '
-echo -n 'Checking for yum-utils... '
-if hash repoquery; then
-	echo 'yes'
-else
-	echo 'no'
-	echo -n 'Installing yum-utils... '
-	SUDO_CMD yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1
-fi
-
+first_of_all
 install_depends $META_DEPENDS $FETCH_DEPENDS
 rpmdev_setuptree
 generate_spec
