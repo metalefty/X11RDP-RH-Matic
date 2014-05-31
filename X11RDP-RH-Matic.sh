@@ -33,6 +33,8 @@ YUM_LOG=${WRKDIR}/yum.log
 BUILD_LOG=${WRKDIR}/build.log
 SUDO_LOG=${WRKDIR}/sudo.log
 RPMS_DIR=$(rpm --eval %{_rpmdir}/%{_arch})
+BUILD_DIR=$(rpm --eval %{_builddir})
+SOURCE_DIR=$(rpm --eval %{_sourcedir})
 
 # variables for this utility
 TARGETS="xrdp x11rdp"
@@ -156,14 +158,13 @@ generate_spec()
 }
 
 fetch() {
-	DISTDIR=$(rpm --eval '%{_sourcedir}')
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
 	echo -n 'Fetching source code... '
-	if [ ! -f ${DISTDIR}/${DISTFILE} ]; then
+	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
 		wget \
 			--quiet \
-			--output-document=${DISTDIR}/${DISTFILE} \
+			--output-document=${SOURCE_DIR}/${DISTFILE} \
 			https://codeload.github.com/${GH_ACCOUNT}/${GH_PROJECT}/legacy.tar.gz/${GH_COMMIT} && \
 		echo 'done'
 	else
@@ -185,10 +186,11 @@ x11rdp_dirty_build()
 		SUDO_CMD find $X11RDPBASE -delete
 	fi
 	
-	tar zxf ${DISTDIR}/${DISTFILE} -C $WRKDIR || error_exit
+	tar zxf ${SOURCE_DIR}/${DISTFILE} -C $WRKDIR || error_exit
+
 	(
 	cd ${WRKDIR}/${WRKSRC}/xorg/X11R7.6 && \
-	patch -p2 < ${DISTDIR}/buildx_patch.diff >> $BUILD_LOG 2>&1 && \
+	patch -p2 < ${SOURCE_DIR}/buildx_patch.diff >> $BUILD_LOG 2>&1 && \
 	sed -i.bak \
 		-e 's/if ! mkdir $PREFIX_DIR/if ! mkdir -p $PREFIX_DIR/' \
 		-e 's/make -j 1/make -j 2/g' \
@@ -217,7 +219,7 @@ build_rpm()
 {
 	echo 'Building RPMs started, please be patient... '
 	for f in $EXTRA_SOURCE; do
-		cp SOURCES/${f} $DISTDIR
+		cp SOURCES/${f} $SOURCE_DIR
 	done
 
 	for f in $TARGETS; do
