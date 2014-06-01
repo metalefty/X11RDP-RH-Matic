@@ -23,4 +23,15 @@ if you confirmed it works.
 - Scientific Linux release 6.5 (Carbon)
 
 
+Experimental Features
+----
+X11RDP-RH-Matic experimentally supports the build of xrdp xorg driver. Run with
+"--with-xorg-driver" option. When you want to build xorg driver, probably you
+don't need X11rdp then also add "--nox11rdp" option.
 
+```
+$ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
+```
+
+You'll probably be required to edit /etc/pam.d/xserver. See also
+[CentOS forum](https://www.centos.org/forums/viewtopic.php?t=21185).
