@@ -28,7 +28,7 @@ GH_PROJECT=xrdp
 GH_BRANCH=master
 GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
 
-WRKDIR=$(mktemp --directory)
+WRKDIR=$(mktemp --directory --suffix .X11RDP-RH-Matic)
 YUM_LOG=${WRKDIR}/yum.log
 BUILD_LOG=${WRKDIR}/build.log
 SUDO_LOG=${WRKDIR}/sudo.log
@@ -67,12 +67,14 @@ error_exit() {
 	echo "	$SUDO_LOG" 1>&2
 	echo "	$YUM_LOG" 1>&2
 	echo "Exitting..." 1>&2
+	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
 }
 
 user_interrupt_exit() {
 	echo; echo
 	echo "Script stopped due to user interrupt, exitting..."
+	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
 }
 
@@ -175,6 +177,7 @@ fetch() {
 x11rdp_dirty_build()
 {
 	X11RDPBASE=/opt/X11rdp
+
 	# remove installed x11rdp before build x11rdp
 	check_if_installed x11rdp
 	if [ $? -eq 0 ]; then
@@ -186,8 +189,10 @@ x11rdp_dirty_build()
 		SUDO_CMD find $X11RDPBASE -delete
 	fi
 	
+	# extract xrdp source
 	tar zxf ${SOURCE_DIR}/${DISTFILE} -C $WRKDIR || error_exit
 
+	# build x11rdp once into $X11RDPBASE
 	(
 	cd ${WRKDIR}/${WRKSRC}/xorg/X11R7.6 && \
 	patch -p2 < ${SOURCE_DIR}/buildx_patch.diff >> $BUILD_LOG 2>&1 && \
@@ -196,9 +201,8 @@ x11rdp_dirty_build()
 		-e 's/make -j 1/make -j 2/g' \
 		-e 's|^download_url=http://server1.xrdp.org/xrdp/X11R7.6|download_url=http://www.club.kyutech.ac.jp/~meta/distfiles/xrdp/X11R7.6|' \
 		buildx.sh >> $BUILD_LOG 2>&1 && \
-	SUDO_CMD ./buildx.sh $X11RDPBASE >> $BUILD_LOG 2>&1 || \
-	error_exit
-	)
+	SUDO_CMD ./buildx.sh $X11RDPBASE >> $BUILD_LOG 2>&1
+	) || error_exit
 
 	QA_RPATHS=$[0x0001|0x0002] rpmbuild -ba ${WRKDIR}/x11rdp.spec >> $BUILD_LOG 2>&1 || error_exit
 
@@ -218,6 +222,8 @@ rpmdev_setuptree()
 build_rpm()
 {
 	echo 'Building RPMs started, please be patient... '
+	echo 'Do the following command to see build progress.'
+	echo "	$ tail -f $BUILD_LOG"
 	for f in $EXTRA_SOURCE; do
 		cp SOURCES/${f} $SOURCE_DIR
 	done
@@ -257,7 +263,8 @@ OPTIONS
   --withjpeg         : include jpeg module
   --with-xorg-driver : build and install xorg-driver"
 		get_branches
-		exit
+		rm -rf $WRKDIR
+		exit 0
 	fi
 
 	while [ $# -gt 0 ]; do
@@ -357,6 +364,18 @@ install_targets_depends(){
 
 first_of_all() {
 	clear
+	if [ ! -f X11RDP-RH-Matic.sh ]; then
+		echo "Make sure you are in X11RDP-RH-Matic directory." 2>&1
+		error_exit
+	fi
+
+	if [ -f .PID ]; then
+		echo "Another instance of $0 is already running." 2>&1
+		error_exit
+	else
+		echo $$ > .PID
+	fi
+
 	echo 'Allow X11RDP-RH-Matic to gain root privileges.'
 	echo 'Type your password if required.'
 	sudo -v
@@ -387,3 +406,6 @@ install_targets_depends
 build_rpm
 remove_installed_xrdp
 install_built_xrdp
+
+[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
+exit 0

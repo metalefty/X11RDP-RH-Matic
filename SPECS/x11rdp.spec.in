@@ -30,7 +30,6 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 X11rdp backend for xrdp remote access server
 
 %build
-#%%X11RDPBASE%%
 %{__rm} -rf %{_builddir}
 %{__mkdir} -p %{_builddir}%%X11RDPBASE%%
 %{__cp} -rp %%X11RDPBASE%%/* %{_builddir}%%X11RDPBASE%%
