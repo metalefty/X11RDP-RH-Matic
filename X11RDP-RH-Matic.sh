@@ -127,9 +127,6 @@ generate_spec()
 	calc_cpu_cores
 	echo -n 'Generating RPM spec files... '
 
-	#read # DEBUG
-	#echo SPECS/*.spec.in #DEBUG
-
 	# replace common variables in spec templates
 	for f in SPECS/*.spec.in
 	do
@@ -289,9 +286,14 @@ OPTIONS
 			NOINSTALL=1
 			;;
 
+		--nocpuoptimize)
+			NOCPUOPTIMIZE=1
+			;;
+
 		--nox11rdp)
 			TARGETS=${TARGETS//x11rdp/}
 			;;
+
 
 		--with-xorg-driver)
 			TARGETS="$TARGETS xorg-x11-drv-rdp"
@@ -319,8 +321,12 @@ get_branches()
 calc_cpu_cores()
 {
 	Cores=`grep -c ^processor /proc/cpuinfo`
-	jobs=$(expr $Cores \* 2)
-	makeCommand="make -j $jobs"
+	jobs=$(expr $Cores + 1)
+	if [ "$NOCPUOPTIMIZE" = "1" ]; then
+		makeCommand="make -j 1"
+	else
+		makeCommand="make -j $jobs"
+	fi
 }
 
 remove_installed_xrdp()
