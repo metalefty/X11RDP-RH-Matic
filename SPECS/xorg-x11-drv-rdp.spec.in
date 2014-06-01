@@ -1,0 +1,53 @@
+%define	xrdpver		%%XRDPVER%%
+%define	xrdpbranch	%%XRDPBRANCH%%
+%define moduledir	%(pkg-config xorg-server --variable=moduledir)
+%define driverdir	%{moduledir}/drivers
+%define inputdir	%{moduledir}/input
+%define	xrdpxorgconfdir	%{_sysconfdir}/X11/xrdp
+
+
+Summary:	Xorg X11 rdp driver for xrdp
+Name:		xorg-x11-drv-rdp
+Version:	%{xrdpver}+%{xrdpbranch}
+License:	MIT
+Release:	1%{?dist}
+URL:		http://www.xrdp.org/
+Source0:	https://codeload.github.com/%%GH_ACCOUNT%%/%%GH_PROJECT%%/legacy.tar.gz/%%GH_COMMIT%%?dummy=/%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
+
+# Dependencies don't vary depending on build options
+Requires:	xorg-x11-server-Xorg
+BuildRequires:	make
+BuildRequires:	gcc
+BuildRequires:	pam-devel
+BuildRequires:	xorg-x11-server-devel
+
+BuildRoot:	%{_tmppath}/%{name}-%{version}-root
+
+%description
+Xorg X11 rdp driver for xrdp
+
+%prep
+%setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/xorg/server
+
+%build
+%{__make}
+
+%install
+%{__mkdir} -p %{buildroot}%{driverdir} %{buildroot}%{inputdir} %{buildroot}%{moduledir}
+%{__cp} xrdpdev/xrdpdev_drv.so %{buildroot}%{driverdir}
+%{__cp} module/libxorgxrdp.so %{buildroot}%{moduledir}
+%{__cp} xrdpmouse/xrdpmouse_drv.so %{buildroot}%{inputdir}
+%{__cp} xrdpkeyb/xrdpkeyb_drv.so %{buildroot}%{inputdir}
+%{__mkdir} -p %{buildroot}%{xrdpxorgconfdir}
+%{__cp} xrdpdev/xorg.conf %{buildroot}%{xrdpxorgconfdir}
+
+%clean
+%{__rm} -rf %{buildroot}
+
+%files
+%defattr(-,root,root,-)
+%{moduledir}/libxorgxrdp.so
+%{driverdir}/xrdpdev_drv.so
+%{inputdir}/xrdpmouse_drv.so
+%{inputdir}/xrdpkeyb_drv.so
+%{xrdpxorgconfdir}/xorg.conf

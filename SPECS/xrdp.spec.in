@@ -1,0 +1,112 @@
+%define	xrdpver		%%XRDPVER%%
+%define	xrdpbranch	%%XRDPBRANCH%%
+
+Summary:	Open source Remote Desktop Protocol (RDP) server
+Name:		xrdp
+Version:	%{xrdpver}+%{xrdpbranch}
+License:	Apache License 2.0
+Release:	1%{?dist}
+URL:		http://www.xrdp.org/
+Source0:	https://codeload.github.com/%%GH_ACCOUNT%%/%%GH_PROJECT%%/legacy.tar.gz/%%GH_COMMIT%%?dummy=/%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
+Source1:	xrdp.init
+Source2:	xrdp.sysconfig
+Source3:	xrdp.logrotate
+
+Patch0:		xrdp-pam-auth.patch
+
+# Basic dependensies
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool
+BuildRequires:	openssl-devel
+BuildRequires:	pam-devel
+BuildRequires:	libX11-devel
+BuildRequires:	libXfixes-devel
+BuildRequires:	libXrandr-devel
+BuildRequires:	fuse-devel
+BuildRequires:	which
+# Additional dependencies which vary on depending on build options
+BuildRequires:	%%BUILDREQUIRES%%
+
+BuildRoot:	%{_tmppath}/%{name}-%{version}-root
+
+#initscripts requires
+Requires(post): chkconfig
+Requires(preun): chkconfig
+# This is for /sbin/service
+Requires(preun): initscripts
+# This is for /sbin/service
+Requires(postun): initscripts
+
+%description
+RDP server for Linux
+
+%prep
+%setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%
+%patch0
+
+%build
+./bootstrap
+%configure \
+	%%CONFIGURE_ARGS%%
+%{__make}
+
+%install
+%{__make} install DESTDIR=%{buildroot}
+#installx xrdp initscript /etc/rc.d/init.d/xrdp
+%{__install} -Dp -m 755 %{SOURCE1} %{buildroot}%{_initddir}/xrdp
+#install xrdp sysconfig /etc/sysconfig/xrdp
+%{__install} -Dp -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/sysconfig/xrdp
+#install logrotate /etc/logrotate.d/xrdp
+%{__install} -Dp -m 644 %{SOURCE3} %{buildroot}%{_sysconfdir}/logrotate.d/xrdp
+# delete files installed for debian
+%{__rm} -rf %{buildroot}/etc/init.d %{buildroot}/etc/default
+
+# rsakeys.ini
+touch %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
+%{__chmod} 0600 %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
+
+%post
+# This adds the proper /etc/rc*.d links for the script
+/sbin/chkconfig --add %{name}
+/sbin/chkconfig %{name} on
+# generate RSA key pair
+xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini > /dev/null
+%{__chmod} 0600 %{_sysconfdir}/xrdp/rsakeys.ini
+/sbin/service %{name} start >/dev/null 2>&1 || :
+
+%preun
+if [ "$1" -eq "0" ] ; then
+    /sbin/chkconfig --del %{name}
+    /sbin/service %{name} stop >/dev/null 2>&1 || :
+fi
+
+%postun
+if [ "$1" -ge "1" ] ; then
+    /sbin/service %{name} condrestart >/dev/null 2>&1 || :
+fi
+
+%clean
+rm -rf %{buildroot}
+
+%files
+%defattr(-,root,root)
+%doc COPYING *.txt
+%dir %{_libdir}/xrdp
+%dir %{_sysconfdir}/xrdp
+%dir %{_datadir}/xrdp
+%config(noreplace) %{_sysconfdir}/xrdp/sesman.ini
+%config(noreplace) %{_sysconfdir}/xrdp/xrdp.ini
+%config(noreplace) %{_sysconfdir}/pam.d/xrdp-sesman
+%config(noreplace) %{_sysconfdir}/logrotate.d/xrdp
+%config(noreplace) %{_sysconfdir}/sysconfig/xrdp
+%{_mandir}/man1/*
+%{_mandir}/man5/*
+%{_mandir}/man8/*
+%{_libdir}/xrdp/*
+%{_datadir}/*
+%{_sbindir}/*
+%{_bindir}/*
+%{_sysconfdir}/*
+%{_initrddir}
+%attr(0600,root,root) %verify(not size md5 mtime) %{_sysconfdir}/xrdp/rsakeys.ini

@@ -1,0 +1,144 @@
+#!/bin/sh
+#
+# xrdp Open source remote desktop protocol (RDP) server
+#
+# chkconfig:   - 64 36
+# description: Open source remote desktop protocol (RDP) server
+#
+
+### BEGIN INIT INFO
+# Provides: xrdp
+# Required-Start: $network
+# Required-Stop: $network
+# Should-Start: $network
+# Should-Stop: $network
+# Default-Start:
+# Default-Stop:
+# Short-Description: Starts the xrdp daemon
+# Description:  Open source remote desktop protocol (RDP) server
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Check that networking is up.
+[ "${NETWORKING}" = "no" ] && exit 0
+
+[ -e /etc/sysconfig/xrdp ] && . /etc/sysconfig/xrdp
+
+start_xrdp() {
+    exec="/usr/sbin/xrdp"
+    prog="xrdp"
+    lockfile=/var/lock/subsys/xrdp
+    [ -x $exec ] || exit 5
+    echo -n $"Starting $prog: "
+    daemon "$exec $XRDP_OPTIONS >> /dev/null"
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+
+stop_xrdp() {
+    prog="xrdp"
+    lockfile=/var/lock/subsys/xrdp
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+start_sesman() {
+    exec="/usr/sbin/xrdp-sesman"
+    prog="xrdp-sesman"
+    lockfile=/var/lock/subsys/xrdp-sesman
+    [ -x $exec ] || exit 5
+    echo -n $"Starting $prog: "
+    daemon "$exec $SESMAN_OPTIONS >> /dev/null"
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+
+stop_sesman() {
+    prog="xrdp-sesman"
+    lockfile=/var/lock/subsys/xrdp-sesman
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+start() {
+    start_xrdp
+    start_sesman
+}
+
+stop() {
+    stop_xrdp
+    stop_sesman
+}
+
+restart() {
+    stop_xrdp
+    stop_sesman
+    start_xrdp
+    start_sesman
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    prog="xrdp"
+    status $prog
+    prog="xrdp-sesman"
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+esac
+exit $?
+
