@@ -49,7 +49,8 @@ XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-rdp.spec.in grep Requires: | grep -v %
 # x11rdp
 X11RDP_BUILD_DEPENDS=$(<SPECS/x11rdp.spec.in grep BuildRequires: | awk '{ print $2 }')
 
-SUDO_CMD() {
+SUDO_CMD()
+{
 	# sudo's password prompt timeouts 5 minutes by most default settings
 	# to avoid exit this script because of sudo timeout
 	echo 1>&2
@@ -59,7 +60,8 @@ SUDO_CMD() {
 	sudo $@ | tee -a $SUDO_LOG
 }
 
-error_exit() {
+error_exit()
+{
 	echo 2>&1; echo 2>&1
 	echo "Oops, something going wrong around line: $BASH_LINENO" 1>&2
 	echo "See logs to get further information:" 1>&2
@@ -71,14 +73,16 @@ error_exit() {
 	exit 1
 }
 
-user_interrupt_exit() {
+user_interrupt_exit()
+{
 	echo; echo
 	echo "Script stopped due to user interrupt, exitting..."
 	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
 }
 
-install_depends() {
+install_depends()
+{
 	for f in $@; do
 		echo -n "Checking for ${f}... "
 		check_if_installed $f
@@ -98,7 +102,8 @@ install_depends() {
 	done
 }
 
-check_if_installed() {
+check_if_installed()
+{
 	if [ "$(repoquery --all --installed --qf="%{name}" "$1")" = "$1" ]; then
 		return 0
 	else
@@ -156,7 +161,8 @@ generate_spec()
 	echo 'done'
 }
 
-fetch() {
+fetch()
+{
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
 	echo -n 'Fetching source code... '
@@ -226,7 +232,7 @@ build_rpm()
 	done
 
 	for f in $TARGETS; do
-		echo -n "Building ${f}..."
+		echo -n "Building ${f}... "
 		case "${f}" in
 			xrdp) QA_RPATHS=$[0x0001] rpmbuild -ba ${WRKDIR}/${f}.spec >> $BUILD_LOG 2>&1 || error_exit ;;
 			x11rdp) x11rdp_dirty_build || error_exit ;;
@@ -234,6 +240,8 @@ build_rpm()
 		esac
 		echo 'done'
 	done
+
+	echo "Built RPMs are located in $RPMS_DIR."
 }
 
 parse_commandline_args()
@@ -358,7 +366,8 @@ install_built_xrdp()
 	done
 }
 
-install_targets_depends(){
+install_targets_depends()
+{
 	for t in $TARGETS; do
 		case "$t" in
 			xrdp) install_depends $XRDP_BUILD_DEPENDS ;;
@@ -368,7 +377,8 @@ install_targets_depends(){
 	done
 }
 
-first_of_all() {
+first_of_all()
+{
 	clear
 	if [ ! -f X11RDP-RH-Matic.sh ]; then
 		echo "Make sure you are in X11RDP-RH-Matic directory." 2>&1
