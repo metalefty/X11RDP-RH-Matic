@@ -22,6 +22,10 @@ if you confirmed it works.
 - CentOS release 6.5 (Final)
 - Scientific Linux release 6.5 (Carbon)
 
+TODOs
+----
+- Support systemd
+
 
 Experimental Features
 ----
