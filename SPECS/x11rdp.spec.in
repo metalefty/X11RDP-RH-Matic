@@ -1,6 +1,9 @@
 %define	xrdpver		%%XRDPVER%%
 %define	xrdpbranch	%%XRDPBRANCH%%
 
+# turn off brp-python-bytecompile
+%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
+
 Summary:	X11rdp backend for xrdp remote access server
 Name:		x11rdp
 Version:	%{xrdpver}+%{xrdpbranch}
@@ -33,6 +36,7 @@ X11rdp backend for xrdp remote access server
 %{__rm} -rf %{_builddir}
 %{__mkdir} -p %{_builddir}%%X11RDPBASE%%
 %{__cp} -rp %%X11RDPBASE%%/* %{_builddir}%%X11RDPBASE%%
+find %{_builddir} ! -perm -u+w -exec %{__chmod} u+w {} \;
 
 %install
 %{__mkdir} -p %{buildroot}/usr/bin %{buildroot}%%X11RDPBASE%%
