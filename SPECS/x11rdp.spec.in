@@ -24,6 +24,7 @@ BuildRequires:	gcc
 BuildRequires:	gcc-c++
 BuildRequires:	gettext
 BuildRequires:	libxslt
+BuildRequires:	make
 BuildRequires:	xorg-x11-font-utils
 BuildRequires:	perl-XML-Parser
 

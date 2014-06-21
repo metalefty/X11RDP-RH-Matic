@@ -25,6 +25,7 @@ BuildRequires:	libXfixes-devel
 BuildRequires:	libXrandr-devel
 BuildRequires:	fuse-devel
 BuildRequires:	which
+BuildRequires:	make
 # Additional dependencies which vary on depending on build options
 BuildRequires:	%%BUILDREQUIRES%%
 
