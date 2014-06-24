@@ -1,7 +1,6 @@
 X11RDP-RH-Matic
 ===============
-
-Install helper tool for xrdp/x11rdp
+[xrdp/x11rdp](https://github.com/neutrinolabs/xrdp) install helper tool for Red Hat based distributions. This utility is inspired by [X11RDP-o-Matic](https://github.com/scarygliders/X11RDP-o-Matic). To talk straight, Red Hat version of X11RDP-o-Matic.
 
 
 Usage
