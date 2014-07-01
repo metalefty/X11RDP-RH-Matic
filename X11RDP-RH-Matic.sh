@@ -10,7 +10,7 @@ if [ $UID -eq 0 ] ; then
 	exit 1
 fi
 
-if ! hash sudo ; then
+if ! hash sudo 2> /dev/null ; then
 	echo "${0}: sudo not found."
 	echo
 	echo 'This utility requires sudo to gain root privileges on demand.'
@@ -399,7 +399,7 @@ first_of_all()
 	# first of all, check if yum-utils installed
 	echo 'First of all, checking for necessary programs to run this script... '
 	echo -n 'Checking for yum-utils... '
-	if hash repoquery; then
+	if hash repoquery 2> /dev/null; then
 		echo 'yes'
 	else
 		echo 'no'
