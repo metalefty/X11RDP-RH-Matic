@@ -58,6 +58,7 @@ SUDO_CMD()
 	echo "	$@" | tee -a $SUDO_LOG 1>&2
 	while ! sudo -v; do :; done
 	sudo $@ | tee -a $SUDO_LOG
+	return ${PIPESTATUS[0]}
 }
 
 error_exit()
