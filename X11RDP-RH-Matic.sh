@@ -202,7 +202,8 @@ x11rdp_dirty_build()
 	patch -p2 < ${SOURCE_DIR}/buildx_patch.diff >> $BUILD_LOG 2>&1 && \
 	sed -i.bak \
 		-e 's/if ! mkdir $PREFIX_DIR/if ! mkdir -p $PREFIX_DIR/' \
-		-e 's/make -j 1/make -j 2/g' \
+		-e 's/wget -cq/wget -cq --retry-connrefused --waitretry=10/' \
+		-e "s/make -j 1/make -j $jobs/g" \
 		-e 's|^download_url=http://server1.xrdp.org/xrdp/X11R7.6|download_url=http://www.club.kyutech.ac.jp/~meta/distfiles/xrdp/X11R7.6|' \
 		buildx.sh >> $BUILD_LOG 2>&1 && \
 	SUDO_CMD ./buildx.sh $X11RDPBASE >> $BUILD_LOG 2>&1
