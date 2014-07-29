@@ -1,3 +1,7 @@
+1.0.3
+-----
+Improve build robustness.
+
 1.0.2
 -----
 Improve build robustness.
