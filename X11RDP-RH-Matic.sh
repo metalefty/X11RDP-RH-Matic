@@ -42,6 +42,7 @@ META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff"
 XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which make"
+XRDP_BUILD_DEPENDS_IMPEDIMENT="systemtap-sdt-devel"
 XRDP_CONFIGURE_ARGS="--enable-fuse"
 
 # xorg driver build/run dependencies
@@ -101,6 +102,29 @@ install_depends()
 		fi
 		sleep 0.1
 	done
+}
+
+remove_depends_impediment()
+{
+	for f in $@; do
+		echo -n "Checking for ${f}... "
+		check_if_installed $f
+		if [ $? -eq 0 ]; then
+			echo "no"
+			echo -n "Removing ${f}... "
+			SUDO_CMD yum -y remove $f >> $YUM_LOG || error_exit
+			XRDP_BUILD_DEPENDS_RESTORE="$XRDP_BUILD_DEPENDS_RESTORE ${f}"
+			echo "done"
+		else
+			echo "yes"
+		fi
+		sleep 0.1
+	done
+}
+
+restore_depends_impediment()
+{
+	install_depends $XRDP_BUILD_DEPENDS_RESTORE
 }
 
 check_if_installed()
@@ -417,11 +441,13 @@ first_of_all()
 parse_commandline_args $@
 first_of_all
 install_depends $META_DEPENDS $FETCH_DEPENDS
+remove_depends_impediment $XRDP_BUILD_DEPENDS_IMPEDIMENT
 rpmdev_setuptree
 generate_spec
 fetch
 install_targets_depends
 build_rpm
+restore_depends_impediment $XRDP_BUILD_DEPENDS_RESTORE
 remove_installed_xrdp
 install_built_xrdp
 
