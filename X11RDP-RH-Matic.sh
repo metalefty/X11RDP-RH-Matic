@@ -40,7 +40,7 @@ SOURCE_DIR=$(rpm --eval %{_sourcedir})
 TARGETS="xrdp x11rdp"
 META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
-EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff"
+EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch"
 XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which make"
 XRDP_CONFIGURE_ARGS="--enable-fuse"
 
@@ -192,14 +192,15 @@ x11rdp_dirty_build()
 	if [ -d $X11RDPBASE ]; then
 		SUDO_CMD find $X11RDPBASE -delete
 	fi
-	
+
 	# extract xrdp source
 	tar zxf ${SOURCE_DIR}/${DISTFILE} -C $WRKDIR || error_exit
 
 	# build x11rdp once into $X11RDPBASE
 	(
 	cd ${WRKDIR}/${WRKSRC}/xorg/X11R7.6 && \
-	patch -p2 < ${SOURCE_DIR}/buildx_patch.diff >> $BUILD_LOG 2>&1 && \
+	patch --forward -p2 < ${SOURCE_DIR}/buildx_patch.diff >> $BUILD_LOG 2>&1 ||: && \
+	patch --forward -p2 < ${SOURCE_DIR}/x11_file_list.patch >> $BUILD_LOG 2>&1 ||: && \
 	sed -i.bak \
 		-e 's/if ! mkdir $PREFIX_DIR/if ! mkdir -p $PREFIX_DIR/' \
 		-e 's/wget -cq/wget -cq --retry-connrefused --waitretry=10/' \
@@ -212,7 +213,7 @@ x11rdp_dirty_build()
 	QA_RPATHS=$[0x0001|0x0002] rpmbuild -ba ${WRKDIR}/x11rdp.spec >> $BUILD_LOG 2>&1 || error_exit
 
 	# cleanup installed files during the build
-	if [ -d $X11RDPBASE ]; then 
+	if [ -d $X11RDPBASE ]; then
 		SUDO_CMD find $X11RDPBASE -delete
 	fi
 }
