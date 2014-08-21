@@ -1,3 +1,7 @@
+1.0.4
+-----
+Fix the build failure if systemtap-sdt-devel is installed. [RHEL Bug 694552](https://bugzilla.redhat.com/show_bug.cgi?id=694552)
+
 1.0.3
 -----
 Improve build robustness.
