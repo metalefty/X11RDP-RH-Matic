@@ -27,6 +27,7 @@ BuildRequires:	libxslt
 BuildRequires:	make
 BuildRequires:	xorg-x11-font-utils
 BuildRequires:	perl-XML-Parser
+BuildRequires:	libxml2-python
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
