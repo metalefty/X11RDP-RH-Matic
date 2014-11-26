@@ -81,32 +81,26 @@ touch %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 %{_bindir}/xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini > /dev/null
 %{__chmod} 0600 %{_sysconfdir}/xrdp/rsakeys.ini
 %if 0%{?with_systemd}
-%systemd_post xrdp.service
-%systemd_post xrdp-sesman.service
+%systemd_post xrdp.service xrdp-sesman.service
 %else
 # This adds the proper /etc/rc*.d links for the script
 if [ "$1" -eq "1" ]; then
     /sbin/chkconfig --add %{name}
-    /sbin/chkconfig %{name} on
-    /sbin/service %{name} start >/dev/null 2>&1 || :
 fi
 %endif
 
 %preun
 %if 0%{?with_systemd}
-%systemd_preun xrdp.service
-%systemd_preun xrdp-sesman.service
+%systemd_preun xrdp.service xrdp-sesman.service
 %else
 if [ "$1" -eq "0" ] ; then
     /sbin/chkconfig --del %{name}
-    /sbin/service %{name} stop >/dev/null 2>&1 || :
 fi
 %endif
 
 %postun
 %if 0%{?with_systemd}
-%systemd_postun xrdp.service
-%systemd_postun xrdp-sesman.service
+%systemd_postun_with_restart xrdp.service xrdp-sesman.service
 %else
 if [ "$1" -ge "1" ] ; then
     /sbin/service %{name} condrestart >/dev/null 2>&1 || :
