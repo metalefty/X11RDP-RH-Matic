@@ -1,5 +1,8 @@
 %define	xrdpver		%%XRDPVER%%
 %define	xrdpbranch	%%XRDPBRANCH%%
+%define moduledir	%(pkg-config xorg-server --variable=moduledir)
+%define driverdir	%{moduledir}/drivers
+%define inputdir	%{moduledir}/input
 %define	xrdpxorgconfdir	%{_sysconfdir}/X11/xrdp
 
 Summary:	Xorg X11 rdp driver for xrdp
