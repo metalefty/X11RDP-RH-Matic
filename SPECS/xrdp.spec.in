@@ -1,6 +1,12 @@
 %define	xrdpver		%%XRDPVER%%
 %define	xrdpbranch	%%XRDPBRANCH%%
 
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
+%global with_systemd 1
+%else
+%global with_systemd 0
+%endif
+
 Summary:	Open source Remote Desktop Protocol (RDP) server
 Name:		xrdp
 Version:	%{xrdpver}+%{xrdpbranch}
@@ -31,13 +37,16 @@ BuildRequires:	%%BUILDREQUIRES%%
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
-#initscripts requires
-Requires(post): chkconfig
-Requires(preun): chkconfig
-# This is for /sbin/service
-Requires(preun): initscripts
-# This is for /sbin/service
+# initscripts is required for /sbin/service
+%if 0%{?with_systemd}
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
+%else
+Requires(post): chkconfig initscripts
+Requires(preun): chkconfig initscripts
 Requires(postun): initscripts
+%endif
 
 %description
 RDP server for Linux
@@ -68,24 +77,41 @@ touch %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 %{__chmod} 0600 %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 
 %post
-# This adds the proper /etc/rc*.d links for the script
-/sbin/chkconfig --add %{name}
-/sbin/chkconfig %{name} on
 # generate RSA key pair
-xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini > /dev/null
+%{_bindir}/xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini > /dev/null
 %{__chmod} 0600 %{_sysconfdir}/xrdp/rsakeys.ini
-/sbin/service %{name} start >/dev/null 2>&1 || :
+%if 0%{?with_systemd}
+%systemd_post xrdp.service
+%systemd_post xrdp-sesman.service
+%else
+# This adds the proper /etc/rc*.d links for the script
+if [ "$1" -eq "1" ]; then
+    /sbin/chkconfig --add %{name}
+    /sbin/chkconfig %{name} on
+    /sbin/service %{name} start >/dev/null 2>&1 || :
+fi
+%endif
 
 %preun
+%if 0%{?with_systemd}
+%systemd_preun xrdp.service
+%systemd_preun xrdp-sesman.service
+%else
 if [ "$1" -eq "0" ] ; then
     /sbin/chkconfig --del %{name}
     /sbin/service %{name} stop >/dev/null 2>&1 || :
 fi
+%endif
 
 %postun
+%if 0%{?with_systemd}
+%systemd_postun xrdp.service
+%systemd_postun xrdp-sesman.service
+%else
 if [ "$1" -ge "1" ] ; then
     /sbin/service %{name} condrestart >/dev/null 2>&1 || :
 fi
+%endif
 
 %clean
 rm -rf %{buildroot}
@@ -110,4 +136,10 @@ rm -rf %{buildroot}
 %{_bindir}/*
 %{_sysconfdir}/*
 %{_initrddir}
+%if 0%{?with_systemd}
+%{_unitdir}/xrdp-sesman.service
+%{_unitdir}/xrdp.service
+%else
+%{_initrddir}
+%endif
 %attr(0600,root,root) %verify(not size md5 mtime) %{_sysconfdir}/xrdp/rsakeys.ini
