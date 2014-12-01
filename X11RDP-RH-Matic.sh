@@ -1,5 +1,8 @@
 #!/bin/bash
 # vim:ts=2:sw=2:sts=0
+VERSION=1.1.0
+RELEASEDATE=
+
 trap user_interrupt_exit 2
 
 if [ $UID -eq 0 ] ; then
@@ -257,6 +260,7 @@ parse_commandline_args()
 OPTIONS
 -------
   --help             : show this help.
+  --version          : show version.
   --branch <branch>  : use one of the available xrdp branches listed above...
                        Examples:
                        --branch v0.8    - use the 0.8 branch.
@@ -277,6 +281,10 @@ OPTIONS
 
 	while [ $# -gt 0 ]; do
 		case "$1" in
+		--version)
+			show_version
+		;;
+
 		--branch)
 			get_branches
 			if [ $(expr "$BRANCHES" : ".*${2}.*") -ne 0 ]; then
@@ -317,6 +325,13 @@ OPTIONS
 		esac
 		shift
 	done
+}
+
+show_version()
+{
+	echo $0 $VERSION
+	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
+	exit 0
 }
 
 get_branches()
