@@ -141,7 +141,7 @@ generate_spec()
 	do
 		sed \
 		-e "s/%%XRDPVER%%/${VERSION}/g" \
-		-e "s/%%XRDPBRANCH%%/${GH_BRANCH}/g" \
+		-e "s/%%XRDPBRANCH%%/${GH_BRANCH//-/_}/g" \
 		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
 		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
 		-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
@@ -374,7 +374,7 @@ install_built_xrdp()
 {
 	[ "$NOINSTALL" = "1" ] && return
 
-	RPM_VERSION_SUFFIX=$(rpm --eval -${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm)
+	RPM_VERSION_SUFFIX=$(rpm --eval -${VERSION}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm)
 
 	for f in $TARGETS ; do
 		echo -n "Installing built $f... "
