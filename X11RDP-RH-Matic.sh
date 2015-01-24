@@ -166,16 +166,15 @@ fetch()
 {
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
-	echo -n 'Fetching source code... '
-	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
-		wget \
-			--quiet \
-			--output-document=${SOURCE_DIR}/${DISTFILE} \
-			https://codeload.github.com/${GH_ACCOUNT}/${GH_PROJECT}/legacy.tar.gz/${GH_COMMIT} && \
-		echo 'done'
-	else
-		echo 'already exists'
-	fi
+	echo -n 'Updating source code... '
+  if [ ! -d ${SOURCE_DIR}/${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT} ]; then
+		git clone --recursive ${GH_URL} ${SOURCE_DIR}/${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
+  fi
+  CURDIR=`pwd`
+  cd ${SOURCE_DIR}/${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT} && git pull
+  cd ${CURDIR}
+  tar cfz ${SOURCE_DIR}/${DISTFILE} -C ${SOURCE_DIR} ${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}/ 
+  echo 'done'
 }
 
 x11rdp_dirty_build()

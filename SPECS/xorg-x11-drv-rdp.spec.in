@@ -20,6 +20,7 @@ BuildRequires:	make
 BuildRequires:	gcc
 BuildRequires:	pam-devel
 BuildRequires:	xorg-x11-server-devel
+BuildRequires:  nasm
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
@@ -27,27 +28,35 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 Xorg X11 rdp driver for xrdp
 
 %prep
-%setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/xorg/server
+%setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/xorgxrdp
 
 %build
+./bootstrap
+%configure \
+        %%CONFIGURE_ARGS%%
 %{__make}
 
 %install
-%{__mkdir} -p %{buildroot}%{driverdir} %{buildroot}%{inputdir} %{buildroot}%{moduledir}
-%{__cp} xrdpdev/xrdpdev_drv.so %{buildroot}%{driverdir}
-%{__cp} module/libxorgxrdp.so %{buildroot}%{moduledir}
-%{__cp} xrdpmouse/xrdpmouse_drv.so %{buildroot}%{inputdir}
-%{__cp} xrdpkeyb/xrdpkeyb_drv.so %{buildroot}%{inputdir}
-%{__mkdir} -p %{buildroot}%{xrdpxorgconfdir}
-%{__cp} xrdpdev/xorg.conf %{buildroot}%{xrdpxorgconfdir}
+%{__make} DESTDIR=%{buildroot} install
+
+#%{__mkdir} -p %{buildroot}%{driverdir} %{buildroot}%{inputdir} %{buildroot}%{moduledir}
+
+#%{__cp} xrdpdev/xrdpdev_drv.so %{buildroot}%{driverdir}
+#%{__cp} module/libxorgxrdp.so %{buildroot}%{moduledir}
+#%{__cp} xrdpmouse/xrdpmouse_drv.so %{buildroot}%{inputdir}
+#%{__cp} xrdpkeyb/xrdpkeyb_drv.so %{buildroot}%{inputdir}
+#%{__mkdir} -p %{buildroot}%{xrdpxorgconfdir}
+#%{__cp} xrdpdev/xorg.conf %{buildroot}%{xrdpxorgconfdir}
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%{moduledir}/libxorgxrdp.so
-%{driverdir}/xrdpdev_drv.so
-%{inputdir}/xrdpmouse_drv.so
-%{inputdir}/xrdpkeyb_drv.so
-%{xrdpxorgconfdir}/xorg.conf
+#%{moduledir}/libxorgxrdp.so
+#%{driverdir}/xrdpdev_drv.so
+#%{inputdir}/xrdpmouse_drv.so
+#%{inputdir}/xrdpkeyb_drv.so
+#%{xrdpxorgconfdir}/xorg.conf
+%config(noreplace) %{_sysconfdir}/X11/xrdp/xorg.conf
+%{moduledir}/*

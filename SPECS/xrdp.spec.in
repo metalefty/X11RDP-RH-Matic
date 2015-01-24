@@ -111,3 +111,5 @@ rm -rf %{buildroot}
 %{_sysconfdir}/*
 %{_initrddir}
 %attr(0600,root,root) %verify(not size md5 mtime) %{_sysconfdir}/xrdp/rsakeys.ini
+/usr/lib/systemd/system/xrdp-sesman.service
+/usr/lib/systemd/system/xrdp.service
