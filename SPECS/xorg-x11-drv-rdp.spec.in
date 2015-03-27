@@ -23,6 +23,7 @@ BuildRequires:	gcc
 BuildRequires:	pam-devel
 BuildRequires:	pkgconfig
 BuildRequires:	xorg-x11-server-devel
+BuildRequires:	nasm
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
@@ -30,7 +31,7 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 Xorg X11 rdp driver for xrdp
 
 %prep
-%setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/xorg/server
+%setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/xorgxrdp
 
 %build
 ./bootstrap
