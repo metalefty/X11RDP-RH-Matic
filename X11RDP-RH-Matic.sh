@@ -122,12 +122,12 @@ calculate_version_num()
 	README=https://raw.github.com/${GH_ACCOUNT}/${GH_PROJECT}/${GH_BRANCH}/readme.txt
 	TMPFILE=$(mktemp)
 	wget --quiet -O $TMPFILE $README  || error_exit
-	VERSION=$(grep xrdp $TMPFILE | head -1 | cut -d " " -f2)
-	if [ "$(echo $VERSION | cut -c1)" != 'v' ]; then
-		VERSION=${VERSION}.git${GH_COMMIT}
+	XRDPVER=$(grep xrdp $TMPFILE | head -1 | cut -d " " -f2)
+	if [ "$(echo $XRDPVER| cut -c1)" != 'v' ]; then
+		XRDPVER=${XRDPVER}.git${GH_COMMIT}
 	fi
 	rm -f $TMPFILE
-	echo $VERSION
+	echo $XRDPVER
 }
 
 generate_spec()
@@ -140,7 +140,7 @@ generate_spec()
 	for f in SPECS/*.spec.in
 	do
 		sed \
-		-e "s/%%XRDPVER%%/${VERSION}/g" \
+		-e "s/%%XRDPVER%%/${XRDPVER}/g" \
 		-e "s/%%XRDPBRANCH%%/${GH_BRANCH//-/_}/g" \
 		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
 		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
@@ -374,7 +374,7 @@ install_built_xrdp()
 {
 	[ "$NOINSTALL" = "1" ] && return
 
-	RPM_VERSION_SUFFIX=$(rpm --eval -${VERSION}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm)
+	RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm)
 
 	for f in $TARGETS ; do
 		echo -n "Installing built $f... "
