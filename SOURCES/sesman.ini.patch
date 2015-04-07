@@ -1,0 +1,19 @@
+--- neutrinolabs-xrdp-b55231f.orig/sesman/sesman.ini	2015-04-07 15:43:51.637776321 +0000
++++ neutrinolabs-xrdp-b55231f/sesman/sesman.ini	2015-04-07 15:44:32.224776216 +0000
+@@ -81,12 +81,10 @@
+ [Xorg]
+ param1=-config
+ param2=xrdp/xorg.conf
+-param3=-logfile
+-param4=/dev/null
+-param5=-noreset
+-param6=-ac
+-param7=-nolisten
+-param8=tcp
++param3=-noreset
++param4=-ac
++param5=-nolisten
++param6=tcp
+ 
+ [Chansrv]
+ # drive redirection, defaults to xrdp_client if not set
