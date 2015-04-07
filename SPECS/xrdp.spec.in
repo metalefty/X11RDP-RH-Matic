@@ -19,6 +19,7 @@ Source2:	xrdp.sysconfig
 Source3:	xrdp.logrotate
 
 Patch0:		xrdp-pam-auth.patch
+Patch1:		sesman.ini.patch
 
 # Basic dependensies
 BuildRequires:	autoconf
@@ -54,6 +55,7 @@ RDP server for Linux
 %prep
 %setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%
 %patch0
+%patch1 -p 1
 
 %build
 ./bootstrap
