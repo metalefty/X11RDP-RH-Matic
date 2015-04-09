@@ -40,8 +40,8 @@ SOURCE_DIR=$(rpm --eval %{_sourcedir})
 TARGETS="xrdp x11rdp"
 META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
-EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch"
-XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which make"
+EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.patch"
+XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which make libxml2-python"
 XRDP_CONFIGURE_ARGS="--enable-fuse"
 
 # xorg driver build/run dependencies
@@ -166,16 +166,15 @@ fetch()
 {
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
-	echo -n 'Fetching source code... '
-	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
-		wget \
-			--quiet \
-			--output-document=${SOURCE_DIR}/${DISTFILE} \
-			https://codeload.github.com/${GH_ACCOUNT}/${GH_PROJECT}/legacy.tar.gz/${GH_COMMIT} && \
-		echo 'done'
-	else
-		echo 'already exists'
-	fi
+	echo -n 'Updating source code... '
+  if [ ! -d ${SOURCE_DIR}/${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT} ]; then
+		git clone --recursive ${GH_URL} ${SOURCE_DIR}/${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
+  fi
+  CURDIR=`pwd`
+  cd ${SOURCE_DIR}/${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT} && git pull
+  cd ${CURDIR}
+  tar cfz ${SOURCE_DIR}/${DISTFILE} -C ${SOURCE_DIR} ${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}/ 
+  echo 'done'
 }
 
 x11rdp_dirty_build()
