@@ -116,26 +116,33 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %doc COPYING *.txt
 %dir %{_libdir}/xrdp
-%dir %{_sysconfdir}/xrdp
 %dir %{_datadir}/xrdp
+%dir %{_sysconfdir}/xrdp
+%dir %{_sysconfdir}/xrdp/pulse
 %config(noreplace) %{_sysconfdir}/xrdp/sesman.ini
 %config(noreplace) %{_sysconfdir}/xrdp/xrdp.ini
+%config(noreplace) %{_sysconfdir}/xrdp/xrdp_keyboard.ini
 %config(noreplace) %{_sysconfdir}/pam.d/xrdp-sesman
 %config(noreplace) %{_sysconfdir}/logrotate.d/xrdp
 %config(noreplace) %{_sysconfdir}/sysconfig/xrdp
+%{_sysconfdir}/xrdp/pulse/*
+%{_sysconfdir}/xrdp/km-*.ini
+%{_sysconfdir}/xrdp/*.sh
+%{_libdir}/xrdp/*
+%{_datadir}/xrdp/*
+%{_sbindir}/*
+%{_bindir}/*
 %{_mandir}/man1/*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
-%{_libdir}/xrdp/*
-%{_datadir}/*
-%{_sbindir}/*
-%{_bindir}/*
-%{_sysconfdir}/*
-%{_initrddir}
+# BUG /etc/rc.d/init.d/xrdp is always installed even though it isn't necessary
+# BUG under systemd environment
+%{_initrddir}/*
 %if 0%{?with_systemd}
 %{_unitdir}/xrdp-sesman.service
 %{_unitdir}/xrdp.service
 %else
-%{_initrddir}
+# BUG upstream bug 
+#%{_initrddir}/*
 %endif
 %attr(0600,root,root) %verify(not size md5 mtime) %{_sysconfdir}/xrdp/rsakeys.ini
