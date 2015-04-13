@@ -172,7 +172,7 @@ fetch()
 	echo -n 'Fetching source code... '
 	
 	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
-		git clone --recursive ${GH_URL} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 && \
+		git clone --recursive ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 && \
 		tar cfz ${WRKDIR}/${DISTFILE} -C ${WRKDIR} ${WRKSRC} && \
 		cp -a ${WRKDIR}/${DISTFILE} ${SOURCE_DIR}/${DISTFILE} || error_exit
 
