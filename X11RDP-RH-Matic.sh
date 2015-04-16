@@ -6,18 +6,20 @@ RELEASEDATE=
 trap user_interrupt_exit 2
 
 if [ $UID -eq 0 ] ; then
-	echo_stderr "${0}:  Never run this utility as root."
-	echo_stderr
-	echo_stderr "This utility builds RPMs. Building RPM's as root is seriously dangerous."
-	echo_stderr "This script will gain root privileges via sudo on demand, then type your password."
+	# write to stderr 1>&2
+	echo "${0}:  Never run this utility as root." 1>&2
+	echo 1>&2
+	echo "This utility builds RPMs. Building RPM's as root is seriously dangerous." 1>&2
+	echo "This script will gain root privileges via sudo on demand, then type your password." 1>&2
 	exit 1
 fi
 
 if ! hash sudo 2> /dev/null ; then
-	echo_stderr "${0}: sudo not found."
-	echo_stderr
-	echo_stderr 'This utility requires sudo to gain root privileges on demand.'
-	echo_stderr 'run `yum -y install sudo` in root privileges before run this utility.'
+	# write to stderr 1>&2
+	echo "${0}: sudo not found." 1>&2
+	echo 1>&2
+	echo 'This utility requires sudo to gain root privileges on demand.' 1>&2
+	echo 'run `yum -y install sudo` in root privileges before run this utility.' 1>&2
 	exit 1
 fi
 
