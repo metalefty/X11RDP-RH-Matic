@@ -282,7 +282,8 @@ OPTIONS
   --noinstall        : do not install anything, just build the packages
   --nox11rdp         : do not build and install x11rdp
   --withjpeg         : include jpeg module
-  --with-xorg-driver : build and install xorg-driver"
+  --with-xorg-driver : build and install xorg-driver
+  --tmpdir <dir>     : specify working directory prefix (/tmp is default)"
 		get_branches
 		rm -rf $WRKDIR
 		exit 0
@@ -322,7 +323,6 @@ OPTIONS
 			TARGETS=${TARGETS//x11rdp/}
 			;;
 
-
 		--with-xorg-driver)
 			TARGETS="$TARGETS xorg-x11-drv-rdp"
 			;;
@@ -330,6 +330,18 @@ OPTIONS
 		--withjpeg)
 			XRDP_CONFIGURE_ARGS="$XRDPCONFIGURE_ARGS --enable-jpeg"
 			XRDP_BUILD_DEPENDS="$XRDP_BUILD_DEPENDS libjpeg-devel"
+			;;
+		--tmpdir)
+			if [ ! -d "${2}" ]; then
+			 	echo_stderr "Invalid working directory '${2}' specified."
+				exit 1
+			fi
+			OLDWRKDIR=${WRKDIR}
+			WRKDIR=$(mktemp --directory --suffix .X11RDP-RH-Matic --tmpdir="${2}") || exit 1
+			YUM_LOG=${WRKDIR}/yum.log
+			BUILD_LOG=${WRKDIR}/build.log
+			SUDO_LOG=${WRKDIR}/sudo.log
+			rmdir ${OLDWRKDIR}
 			;;
 		esac
 		shift
@@ -417,6 +429,10 @@ first_of_all()
 		error_exit
 	else
 		echo $$ > .PID
+	fi
+
+	if [ -n "${OLDWRKDIR}" ]; then
+		echo "Using working directory ${WRKDIR} instead of default."
 	fi
 
 	echo 'Allow X11RDP-RH-Matic to gain root privileges.'
