@@ -1,5 +1,8 @@
 #!/bin/bash
 # vim:ts=2:sw=2:sts=0
+VERSION=1.1.0
+RELEASEDATE=
+
 trap user_interrupt_exit 2
 
 if [ $UID -eq 0 ] ; then
@@ -40,7 +43,7 @@ SOURCE_DIR=$(rpm --eval %{_sourcedir})
 TARGETS="xrdp x11rdp"
 META_DEPENDS="dialog rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
-EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch"
+EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.patch"
 XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which make"
 XRDP_CONFIGURE_ARGS="--enable-fuse"
 
@@ -119,12 +122,12 @@ calculate_version_num()
 	README=https://raw.github.com/${GH_ACCOUNT}/${GH_PROJECT}/${GH_BRANCH}/readme.txt
 	TMPFILE=$(mktemp)
 	wget --quiet -O $TMPFILE $README  || error_exit
-	VERSION=$(grep xrdp $TMPFILE | head -1 | cut -d " " -f2)
-	if [ "$(echo $VERSION | cut -c1)" != 'v' ]; then
-		VERSION=${VERSION}.git${GH_COMMIT}
+	XRDPVER=$(grep xrdp $TMPFILE | head -1 | cut -d " " -f2)
+	if [ "$(echo $XRDPVER| cut -c1)" != 'v' ]; then
+		XRDPVER=${XRDPVER}.git${GH_COMMIT}
 	fi
 	rm -f $TMPFILE
-	echo $VERSION
+	echo $XRDPVER
 }
 
 generate_spec()
@@ -137,8 +140,8 @@ generate_spec()
 	for f in SPECS/*.spec.in
 	do
 		sed \
-		-e "s/%%XRDPVER%%/${VERSION}/g" \
-		-e "s/%%XRDPBRANCH%%/${GH_BRANCH}/g" \
+		-e "s/%%XRDPVER%%/${XRDPVER}/g" \
+		-e "s/%%XRDPBRANCH%%/${GH_BRANCH//-/_}/g" \
 		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
 		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
 		-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
@@ -167,11 +170,12 @@ fetch()
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
 	echo -n 'Fetching source code... '
+	
 	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
-		wget \
-			--quiet \
-			--output-document=${SOURCE_DIR}/${DISTFILE} \
-			https://codeload.github.com/${GH_ACCOUNT}/${GH_PROJECT}/legacy.tar.gz/${GH_COMMIT} && \
+		git clone --recursive ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 && \
+		tar cfz ${WRKDIR}/${DISTFILE} -C ${WRKDIR} ${WRKSRC} && \
+		cp -a ${WRKDIR}/${DISTFILE} ${SOURCE_DIR}/${DISTFILE} || error_exit
+
 		echo 'done'
 	else
 		echo 'already exists'
@@ -257,6 +261,7 @@ parse_commandline_args()
 OPTIONS
 -------
   --help             : show this help.
+  --version          : show version.
   --branch <branch>  : use one of the available xrdp branches listed above...
                        Examples:
                        --branch v0.8    - use the 0.8 branch.
@@ -277,6 +282,10 @@ OPTIONS
 
 	while [ $# -gt 0 ]; do
 		case "$1" in
+		--version)
+			show_version
+		;;
+
 		--branch)
 			get_branches
 			if [ $(expr "$BRANCHES" : ".*${2}.*") -ne 0 ]; then
@@ -319,6 +328,13 @@ OPTIONS
 	done
 }
 
+show_version()
+{
+	echo $0 $VERSION
+	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
+	exit 0
+}
+
 get_branches()
 {
 	echo $LINE
@@ -359,7 +375,7 @@ install_built_xrdp()
 {
 	[ "$NOINSTALL" = "1" ] && return
 
-	RPM_VERSION_SUFFIX=$(rpm --eval -${VERSION}+${GH_BRANCH}-1%{?dist}.%{_arch}.rpm)
+	RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm)
 
 	for f in $TARGETS ; do
 		echo -n "Installing built $f... "
