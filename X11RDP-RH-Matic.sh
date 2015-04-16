@@ -285,7 +285,7 @@ OPTIONS
   --with-xorg-driver : build and install xorg-driver
   --tmpdir <dir>     : specify working directory prefix (/tmp is default)"
 		get_branches
-		rm -rf $WRKDIR
+		rmdir ${WRKDIR}
 		exit 0
 	fi
 
