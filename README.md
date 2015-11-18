@@ -14,16 +14,20 @@ $ ./X11RDP-RH-Matic.sh
 Supported Distributions
 ----
 
-Currently, X11RDP-RH-Matic is developed on CentOS 6.5 and tested following
+Currently, X11RDP-RH-Matic is developed on CentOS 6.6 and tested following
 distributions. It may work on other RHEL clone distributions. Please report
 if you confirmed it works.
 
 - CentOS release 6.5 (Final)
+- CentOS release 6.6 (Final) reported by Michael Niehren
 - Scientific Linux release 6.5 (Carbon)
+
+Now RHEL/CentOS 7 or later are experimentally supported.
 
 TODOs
 ----
-- Support systemd
+
+There's nothing major TODOs so far.
 
 
 Experimental Features

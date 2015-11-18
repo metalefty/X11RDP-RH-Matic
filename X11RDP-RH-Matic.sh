@@ -6,18 +6,20 @@ RELEASEDATE=
 trap user_interrupt_exit 2
 
 if [ $UID -eq 0 ] ; then
-	echo "${0}:  Never run this utility as root."
-	echo
-	echo "This utility builds RPMs. Building RPM's as root is seriously dangerous."
-	echo "This script will gain root privileges via sudo on demand, then type your password."
+	# write to stderr 1>&2
+	echo "${0}:  Never run this utility as root." 1>&2
+	echo 1>&2
+	echo "This utility builds RPMs. Building RPM's as root is seriously dangerous." 1>&2
+	echo "This script will gain root privileges via sudo on demand, then type your password." 1>&2
 	exit 1
 fi
 
 if ! hash sudo 2> /dev/null ; then
-	echo "${0}: sudo not found."
-	echo
-	echo 'This utility requires sudo to gain root privileges on demand.'
-	echo 'run `yum -y install sudo` in root privileges before run this utility.'
+	# write to stderr 1>&2
+	echo "${0}: sudo not found." 1>&2
+	echo 1>&2
+	echo 'This utility requires sudo to gain root privileges on demand.' 1>&2
+	echo 'run `yum -y install sudo` in root privileges before run this utility.' 1>&2
 	exit 1
 fi
 
@@ -56,7 +58,8 @@ SUDO_CMD()
 {
 	# sudo's password prompt timeouts 5 minutes by most default settings
 	# to avoid exit this script because of sudo timeout
-	echo 1>&2
+	echo_stderr
+	# not using echo_stderr here because output also be written $SUDO_LOG
 	echo "Following command will be executed via sudo:" | tee -a $SUDO_LOG 1>&2
 	echo "	$@" | tee -a $SUDO_LOG 1>&2
 	while ! sudo -v; do :; done
@@ -64,23 +67,28 @@ SUDO_CMD()
 	return ${PIPESTATUS[0]}
 }
 
+echo_stderr()
+{
+	echo $@ 1>&2
+}
+
 error_exit()
 {
-	echo 2>&1; echo 2>&1
-	echo "Oops, something going wrong around line: $BASH_LINENO" 1>&2
-	echo "See logs to get further information:" 1>&2
-	echo "	$BUILD_LOG" 1>&2
-	echo "	$SUDO_LOG" 1>&2
-	echo "	$YUM_LOG" 1>&2
-	echo "Exitting..." 1>&2
+	echo_stderr; echo_stderr
+	echo_stderr "Oops, something going wrong around line: $BASH_LINENO"
+	echo_stderr "See logs to get further information:"
+	echo_stderr "	$BUILD_LOG"
+	echo_stderr "	$SUDO_LOG"
+	echo_stderr "	$YUM_LOG"
+	echo_stderr "Exitting..."
 	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
 }
 
 user_interrupt_exit()
 {
-	echo; echo
-	echo "Script stopped due to user interrupt, exitting..."
+	echo_stderr; echo_stderr
+	echo_stderr "Script stopped due to user interrupt, exitting..."
 	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
 }
@@ -170,7 +178,7 @@ fetch()
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
 	echo -n 'Fetching source code... '
-	
+
 	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
 		git clone --recursive ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 && \
 		tar cfz ${WRKDIR}/${DISTFILE} -C ${WRKDIR} ${WRKSRC} && \
@@ -274,9 +282,10 @@ OPTIONS
   --noinstall        : do not install anything, just build the packages
   --nox11rdp         : do not build and install x11rdp
   --withjpeg         : include jpeg module
-  --with-xorg-driver : build and install xorg-driver"
+  --with-xorg-driver : build and install xorg-driver
+  --tmpdir <dir>     : specify working directory prefix (/tmp is default)"
 		get_branches
-		rm -rf $WRKDIR
+		rmdir ${WRKDIR}
 		exit 0
 	fi
 
@@ -314,14 +323,25 @@ OPTIONS
 			TARGETS=${TARGETS//x11rdp/}
 			;;
 
-
 		--with-xorg-driver)
 			TARGETS="$TARGETS xorg-x11-drv-rdp"
 			;;
 
 		--withjpeg)
-			XRDP_CONFIGURE_ARGS="$XRDPCONFIGURE_ARGS --enable-jpeg"
+			XRDP_CONFIGURE_ARGS="$XRDP_CONFIGURE_ARGS --enable-jpeg"
 			XRDP_BUILD_DEPENDS="$XRDP_BUILD_DEPENDS libjpeg-devel"
+			;;
+		--tmpdir)
+			if [ ! -d "${2}" ]; then
+			 	echo_stderr "Invalid working directory '${2}' specified."
+				exit 1
+			fi
+			OLDWRKDIR=${WRKDIR}
+			WRKDIR=$(mktemp --directory --suffix .X11RDP-RH-Matic --tmpdir="${2}") || exit 1
+			YUM_LOG=${WRKDIR}/yum.log
+			BUILD_LOG=${WRKDIR}/build.log
+			SUDO_LOG=${WRKDIR}/sudo.log
+			rmdir ${OLDWRKDIR}
 			;;
 		esac
 		shift
@@ -400,15 +420,19 @@ first_of_all()
 {
 	clear
 	if [ ! -f X11RDP-RH-Matic.sh ]; then
-		echo "Make sure you are in X11RDP-RH-Matic directory." 2>&1
+		echo_stderr "Make sure you are in X11RDP-RH-Matic directory." 2>&1
 		error_exit
 	fi
 
 	if [ -f .PID ]; then
-		echo "Another instance of $0 is already running." 2>&1
+		echo_stderr "Another instance of $0 is already running." 2>&1
 		error_exit
 	else
 		echo $$ > .PID
+	fi
+
+	if [ -n "${OLDWRKDIR}" ]; then
+		echo "Using working directory ${WRKDIR} instead of default."
 	fi
 
 	echo 'Allow X11RDP-RH-Matic to gain root privileges.'
