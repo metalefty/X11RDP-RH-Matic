@@ -1,0 +1,25 @@
+diff --git sesman/chansrv/chansrv_fuse.c sesman/chansrv/chansrv_fuse.c
+index b3499ad..5d37850 100644
+--- sesman/chansrv/chansrv_fuse.c
++++ sesman/chansrv/chansrv_fuse.c
+@@ -574,9 +574,9 @@ char buf[135168];
+             return -1;
+ 
+ #ifdef HACK
+-        fuse_session_process(g_se, buf, rval, tmpch);
++        fuse_session_process(g_se, buf, rval, tmpch, 0);
+ #else
+-        fuse_session_process(g_se, g_buffer, rval, tmpch);
++        fuse_session_process(g_se, g_buffer, rval, tmpch, 0);
+ #endif
+     }
+ 
+@@ -808,7 +808,7 @@ int xfuse_file_contents_size(int stream_id, int file_size)
+ 
+ static int xfuse_init_lib(struct fuse_args *args)
+ {
+-    if (fuse_parse_cmdline(args, &g_mount_point, 0, 0) < 0)
++    if (fuse_parse_cmdline(args, &g_mount_point, 0, 0, 0) < 0)
+     {
+         log_error("fuse_parse_cmdline() failed");
+         fuse_opt_free_args(args);
