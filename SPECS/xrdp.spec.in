@@ -80,7 +80,7 @@ touch %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 
 %post
 # generate RSA key pair
-%{_bindir}/xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini > /dev/null
+%{_bindir}/xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini 2048> /dev/null
 %{__chmod} 0600 %{_sysconfdir}/xrdp/rsakeys.ini
 %if 0%{?with_systemd}
 %systemd_post xrdp.service xrdp-sesman.service
