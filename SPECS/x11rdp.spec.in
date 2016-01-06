@@ -10,7 +10,7 @@ Version:	%{xrdpver}+%{xrdpbranch}
 License:	MIT
 Release:	1%{?dist}
 URL:		http://www.xrdp.org/
-Source0:	https://codeload.github.com/%%GH_ACCOUNT%%/%%GH_PROJECT%%/legacy.tar.gz/%%GH_COMMIT%%?dummy=/%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
+Source0:	%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
 
 Patch0:		buildx_patch.diff
 
