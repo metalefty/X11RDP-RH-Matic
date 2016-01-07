@@ -1,4 +1,4 @@
-%define	xrdpver		%%XRDPVER%%
+%define	xorgxrdpver	%%XORGXRDPVER%%
 %define	xrdpbranch	%%XRDPBRANCH%%
 %define moduledir	%(pkg-config xorg-server --variable=moduledir)
 %define driverdir	%{moduledir}/drivers
@@ -7,7 +7,7 @@
 
 Summary:	Xorg X11 rdp driver for xrdp
 Name:		xorg-x11-drv-rdp
-Version:	%{xrdpver}+%{xrdpbranch}
+Version:	%{xorgxrdpver}+%{xrdpbranch}
 License:	MIT
 Release:	1%{?dist}
 URL:		http://www.xrdp.org/

@@ -130,16 +130,14 @@ check_if_installed()
 calculate_version_num()
 {
 	echo -n 'Calculating RPM version number... '
-	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep $GH_BRANCH | head -c7)
-	README=https://raw.github.com/${GH_ACCOUNT}/${GH_PROJECT}/${GH_BRANCH}/readme.txt
-	TMPFILE=$(mktemp)
-	wget --quiet -O $TMPFILE $README  || error_exit
-	XRDPVER=$(grep xrdp $TMPFILE | head -1 | cut -d " " -f2)
-	if [ "$(echo $XRDPVER| cut -c1)" != 'v' ]; then
-		XRDPVER=${XRDPVER}.git${GH_COMMIT}
+	if [ -e ${WRKDIR}/${WRKWRC} ]; then
+		tar zxf ${SOURCE_DIR}/${DISTFILE} -C ${WRKDIR} || error_exit
 	fi
-	rm -f $TMPFILE
-	echo $XRDPVER
+	XRDPVER=$(cd ${WRKDIR}/${WRKSRC}; grep xrdp readme.txt | head -1 | cut -d " " -f2)
+	XORGXRDPVER=${XRDPVER}.git$(cd ${WRKDIR}/${WRKSRC}/xorgxrdp; git rev-parse HEAD | head -c7)
+	XRDPVER=${XRDPVER}.git${GH_COMMIT}
+
+	echo xrdp=$XRDPVER xorgxrdp=$XORGXRDPVER
 }
 
 generate_spec()
@@ -153,6 +151,7 @@ generate_spec()
 	do
 		sed \
 		-e "s/%%XRDPVER%%/${XRDPVER}/g" \
+		-e "s/%%XORGXRDPVER%%/${XORGXRDPVER}/g" \
 		-e "s/%%XRDPBRANCH%%/${GH_BRANCH//-/_}/g" \
 		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
 		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
@@ -177,11 +176,12 @@ generate_spec()
 	echo 'done'
 }
 
-fetch()
+clone()
 {
+	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep $GH_BRANCH | head -c7)
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
-	echo -n 'Fetching source code... '
+	echo -n 'Cloning source code... '
 
 	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
 		git clone --recursive ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 && \
@@ -462,8 +462,8 @@ parse_commandline_args $@
 first_of_all
 install_depends $META_DEPENDS $FETCH_DEPENDS
 rpmdev_setuptree
+clone
 generate_spec
-fetch
 install_targets_depends
 build_rpm
 remove_installed_xrdp
