@@ -367,8 +367,7 @@ get_branches()
 
 calc_cpu_cores()
 {
-	Cores=`grep -c ^processor /proc/cpuinfo`
-	jobs=$(expr $Cores + 1)
+	jobs=$(($(nproc) + 1))
 	if [ "$NOCPUOPTIMIZE" = "1" ]; then
 		makeCommand="make -j 1"
 	else
