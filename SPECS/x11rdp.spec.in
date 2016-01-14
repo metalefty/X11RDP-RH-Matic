@@ -43,7 +43,7 @@ find %{_builddir} ! -perm -u+w -exec %{__chmod} u+w {} \;
 %install
 %{__mkdir} -p %{buildroot}/usr/bin %{buildroot}%%X11RDPBASE%%
 %{__cp} -rp %{_builddir}%%X11RDPBASE%%/* %{buildroot}%%X11RDPBASE%%
-find %{buildroot}%%X11RDPBASE%%/var/cache -delete
+[ -d %{buildroot}%%X11RDPBASE%%/var/cache ] && find %{buildroot}%%X11RDPBASE%%/var/cache -delete
 ln -s %%X11RDPBASE%%/bin/X11rdp %{buildroot}/usr/bin
 
 %clean
