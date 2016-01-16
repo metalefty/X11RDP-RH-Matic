@@ -49,6 +49,10 @@ EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx
 XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which make"
 XRDP_CONFIGURE_ARGS="--enable-fuse"
 
+# flags
+PARALLELMAKE=true # increase make jobs
+INSTALL_XRDP=true # install built package after build
+
 # xorg driver build/run dependencies
 XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-rdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
 # x11rdp
@@ -312,11 +316,11 @@ OPTIONS
 			;;
 
 		--noinstall)
-			NOINSTALL=1
+			INSTALL_XRDP=false
 			;;
 
 		--nocpuoptimize)
-			NOCPUOPTIMIZE=1
+			PARALLELMAKE=false
 			;;
 
 		--nox11rdp)
@@ -367,18 +371,17 @@ get_branches()
 
 calc_cpu_cores()
 {
-	Cores=`grep -c ^processor /proc/cpuinfo`
-	jobs=$(expr $Cores + 1)
-	if [ "$NOCPUOPTIMIZE" = "1" ]; then
-		makeCommand="make -j 1"
-	else
+	jobs=$(($(nproc) + 1))
+	if $PARALLELMAKE
 		makeCommand="make -j $jobs"
+	else
+		makeCommand="make -j 1"
 	fi
 }
 
 remove_installed_xrdp()
 {
-	[ "$NOINSTALL" = "1" ] && return
+	$INSTALL_XRDP || return
 
 	# uninstall xrdp first if installed
 	for f in $TARGETS ; do
@@ -393,7 +396,7 @@ remove_installed_xrdp()
 
 install_built_xrdp()
 {
-	[ "$NOINSTALL" = "1" ] && return
+	$INSTALL_XRDP || return
 
 	RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm)
 

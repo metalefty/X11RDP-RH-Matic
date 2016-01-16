@@ -13,7 +13,7 @@ Version:	%{xrdpver}+%{xrdpbranch}
 License:	Apache License 2.0
 Release:	1%{?dist}
 URL:		http://www.xrdp.org/
-Source0:	https://codeload.github.com/%%GH_ACCOUNT%%/%%GH_PROJECT%%/legacy.tar.gz/%%GH_COMMIT%%?dummy=/%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
+Source0:	%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
 Source1:	xrdp.init
 Source2:	xrdp.sysconfig
 Source3:	xrdp.logrotate
@@ -80,7 +80,7 @@ touch %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 
 %post
 # generate RSA key pair
-%{_bindir}/xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini > /dev/null
+%{_bindir}/xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini 2048> /dev/null
 %{__chmod} 0600 %{_sysconfdir}/xrdp/rsakeys.ini
 %if 0%{?with_systemd}
 %systemd_post xrdp.service xrdp-sesman.service

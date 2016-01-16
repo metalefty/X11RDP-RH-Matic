@@ -10,7 +10,7 @@ Version:	%{xrdpver}+%{xrdpbranch}
 License:	MIT
 Release:	1%{?dist}
 URL:		http://www.xrdp.org/
-Source0:	https://codeload.github.com/%%GH_ACCOUNT%%/%%GH_PROJECT%%/legacy.tar.gz/%%GH_COMMIT%%?dummy=/%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
+Source0:	%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
 
 Patch0:		buildx_patch.diff
 
@@ -43,7 +43,7 @@ find %{_builddir} ! -perm -u+w -exec %{__chmod} u+w {} \;
 %install
 %{__mkdir} -p %{buildroot}/usr/bin %{buildroot}%%X11RDPBASE%%
 %{__cp} -rp %{_builddir}%%X11RDPBASE%%/* %{buildroot}%%X11RDPBASE%%
-find %{buildroot}%%X11RDPBASE%%/var/cache -delete
+[ -d %{buildroot}%%X11RDPBASE%%/var/cache ] && find %{buildroot}%%X11RDPBASE%%/var/cache -delete
 ln -s %%X11RDPBASE%%/bin/X11rdp %{buildroot}/usr/bin
 
 %clean
