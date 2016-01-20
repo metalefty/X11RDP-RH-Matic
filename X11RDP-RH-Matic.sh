@@ -372,7 +372,7 @@ get_branches()
 calc_cpu_cores()
 {
 	jobs=$(($(nproc) + 1))
-	if $PARALLELMAKE
+	if $PARALLELMAKE; then
 		makeCommand="make -j $jobs"
 	else
 		makeCommand="make -j 1"
