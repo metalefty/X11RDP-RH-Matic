@@ -35,6 +35,8 @@ BuildRequires:	which
 BuildRequires:	make
 # Additional dependencies which vary on depending on build options
 BuildRequires:	%%BUILDREQUIRES%%
+# Runtime dependencies
+Requires:	fuse
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
