@@ -398,12 +398,16 @@ install_built_xrdp()
 {
 	$INSTALL_XRDP || return
 
-	RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm)
-
-	for f in $TARGETS ; do
-		echo -n "Installing built $f... "
+	for t in $TARGETS ; do
+		echo -n "Installing built $t... "
+		case "$t" in
+			xorg-x11-drv-xrdp)
+				RPM_VERSION_SUFFIX=$(rpm --eval -${XORGXRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm) ;;
+			*)
+				RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm) ;;
+		esac
 		SUDO_CMD yum -y localinstall \
-			${RPMS_DIR}/${f}${RPM_VERSION_SUFFIX} \
+			${RPMS_DIR}/${t}${RPM_VERSION_SUFFIX} \
 			>> $YUM_LOG && echo "done" || error_exit
 	done
 }
