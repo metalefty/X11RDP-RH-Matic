@@ -54,7 +54,7 @@ PARALLELMAKE=true # increase make jobs
 INSTALL_XRDP=true # install built package after build
 
 # xorg driver build/run dependencies
-XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-rdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
+XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-xrdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
 # x11rdp
 X11RDP_BUILD_DEPENDS=$(<SPECS/x11rdp.spec.in grep BuildRequires: | awk '{ print $2 }')
 
@@ -161,7 +161,7 @@ generate_spec()
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XORG_DRIVER_BUILD_DEPENDS}/" \
-	${WRKDIR}/xorg-x11-drv-rdp.spec || error_exit
+	${WRKDIR}/xorg-x11-drv-xrdp.spec || error_exit
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XRDP_BUILD_DEPENDS}/g" \
@@ -328,7 +328,7 @@ OPTIONS
 			;;
 
 		--with-xorg-driver)
-			TARGETS="$TARGETS xorg-x11-drv-rdp"
+			TARGETS="$TARGETS xorg-x11-drv-xrdp"
 			;;
 
 		--withjpeg)
@@ -414,7 +414,7 @@ install_targets_depends()
 		case "$t" in
 			xrdp) install_depends $XRDP_BUILD_DEPENDS ;;
 			x11rdp) install_depends $X11RDP_BUILD_DEPENDS ;;
-			xorg-x11-drv-rdp) install_depends $XORG_DRIVER_DEPENDS ;;
+			xorg-x11-drv-xrdp) install_depends $XORG_DRIVER_DEPENDS ;;
 		esac
 	done
 }

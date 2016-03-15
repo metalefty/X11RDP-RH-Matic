@@ -6,7 +6,7 @@
 %define	xrdpxorgconfdir	%{_sysconfdir}/X11/xrdp
 
 Summary:	Xorg X11 rdp driver for xrdp
-Name:		xorg-x11-drv-rdp
+Name:		xorg-x11-drv-xrdp
 Version:	%{xorgxrdpver}+%{xrdpbranch}
 License:	MIT
 Release:	1%{?dist}
