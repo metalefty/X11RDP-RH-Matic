@@ -46,8 +46,8 @@ TARGETS="xrdp x11rdp"
 META_DEPENDS="rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.patch"
-XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which make"
-XRDP_CONFIGURE_ARGS="--enable-fuse --enable-rfxcodec"
+XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libjpeg-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which make"
+XRDP_CONFIGURE_ARGS="--enable-fuse --enable-rfxcodec --enable-jpeg"
 
 # flags
 PARALLELMAKE=true # increase make jobs
@@ -285,7 +285,6 @@ OPTIONS
   --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
   --noinstall        : do not install anything, just build the packages
   --nox11rdp         : do not build and install x11rdp
-  --withjpeg         : include jpeg module
   --with-xorg-driver : build and install xorg-driver
   --tmpdir <dir>     : specify working directory prefix (/tmp is default)"
 		get_branches
@@ -331,10 +330,6 @@ OPTIONS
 			TARGETS="$TARGETS xorg-x11-drv-xrdp"
 			;;
 
-		--withjpeg)
-			XRDP_CONFIGURE_ARGS="$XRDP_CONFIGURE_ARGS --enable-jpeg"
-			XRDP_BUILD_DEPENDS="$XRDP_BUILD_DEPENDS libjpeg-devel"
-			;;
 		--tmpdir)
 			if [ ! -d "${2}" ]; then
 			 	echo_stderr "Invalid working directory '${2}' specified."
