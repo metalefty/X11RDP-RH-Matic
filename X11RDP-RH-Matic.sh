@@ -54,7 +54,7 @@ PARALLELMAKE=true # increase make jobs
 INSTALL_XRDP=true # install built package after build
 
 # xorg driver build/run dependencies
-XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-rdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
+XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-xrdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
 # x11rdp
 X11RDP_BUILD_DEPENDS=$(<SPECS/x11rdp.spec.in grep BuildRequires: | awk '{ print $2 }')
 
@@ -130,16 +130,14 @@ check_if_installed()
 calculate_version_num()
 {
 	echo -n 'Calculating RPM version number... '
-	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep $GH_BRANCH | head -c7)
-	README=https://raw.github.com/${GH_ACCOUNT}/${GH_PROJECT}/${GH_BRANCH}/readme.txt
-	TMPFILE=$(mktemp)
-	wget --quiet -O $TMPFILE $README  || error_exit
-	XRDPVER=$(grep xrdp $TMPFILE | head -1 | cut -d " " -f2)
-	if [ "$(echo $XRDPVER| cut -c1)" != 'v' ]; then
-		XRDPVER=${XRDPVER}.git${GH_COMMIT}
+	if [ -e ${WRKDIR}/${WRKWRC} ]; then
+		tar zxf ${SOURCE_DIR}/${DISTFILE} -C ${WRKDIR} || error_exit
 	fi
-	rm -f $TMPFILE
-	echo $XRDPVER
+	XRDPVER=$(cd ${WRKDIR}/${WRKSRC}; grep xrdp readme.txt | head -1 | cut -d " " -f2)
+	XORGXRDPVER=${XRDPVER}.git$(cd ${WRKDIR}/${WRKSRC}/xorgxrdp; git rev-parse HEAD | head -c7)
+	XRDPVER=${XRDPVER}.git${GH_COMMIT}
+
+	echo xrdp=$XRDPVER xorgxrdp=$XORGXRDPVER
 }
 
 generate_spec()
@@ -153,6 +151,7 @@ generate_spec()
 	do
 		sed \
 		-e "s/%%XRDPVER%%/${XRDPVER}/g" \
+		-e "s/%%XORGXRDPVER%%/${XORGXRDPVER}/g" \
 		-e "s/%%XRDPBRANCH%%/${GH_BRANCH//-/_}/g" \
 		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
 		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
@@ -162,7 +161,7 @@ generate_spec()
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XORG_DRIVER_BUILD_DEPENDS}/" \
-	${WRKDIR}/xorg-x11-drv-rdp.spec || error_exit
+	${WRKDIR}/xorg-x11-drv-xrdp.spec || error_exit
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XRDP_BUILD_DEPENDS}/g" \
@@ -177,11 +176,12 @@ generate_spec()
 	echo 'done'
 }
 
-fetch()
+clone()
 {
+	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep $GH_BRANCH | head -c7)
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
-	echo -n 'Fetching source code... '
+	echo -n 'Cloning source code... '
 
 	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
 		git clone --recursive ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 && \
@@ -328,7 +328,7 @@ OPTIONS
 			;;
 
 		--with-xorg-driver)
-			TARGETS="$TARGETS xorg-x11-drv-rdp"
+			TARGETS="$TARGETS xorg-x11-drv-xrdp"
 			;;
 
 		--withjpeg)
@@ -398,12 +398,16 @@ install_built_xrdp()
 {
 	$INSTALL_XRDP || return
 
-	RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm)
-
-	for f in $TARGETS ; do
-		echo -n "Installing built $f... "
+	for t in $TARGETS ; do
+		echo -n "Installing built $t... "
+		case "$t" in
+			xorg-x11-drv-xrdp)
+				RPM_VERSION_SUFFIX=$(rpm --eval -${XORGXRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm) ;;
+			*)
+				RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm) ;;
+		esac
 		SUDO_CMD yum -y localinstall \
-			${RPMS_DIR}/${f}${RPM_VERSION_SUFFIX} \
+			${RPMS_DIR}/${t}${RPM_VERSION_SUFFIX} \
 			>> $YUM_LOG && echo "done" || error_exit
 	done
 }
@@ -414,7 +418,7 @@ install_targets_depends()
 		case "$t" in
 			xrdp) install_depends $XRDP_BUILD_DEPENDS ;;
 			x11rdp) install_depends $X11RDP_BUILD_DEPENDS ;;
-			xorg-x11-drv-rdp) install_depends $XORG_DRIVER_DEPENDS ;;
+			xorg-x11-drv-xrdp) install_depends $XORG_DRIVER_DEPENDS ;;
 		esac
 	done
 }
@@ -462,8 +466,8 @@ parse_commandline_args $@
 first_of_all
 install_depends $META_DEPENDS $FETCH_DEPENDS
 rpmdev_setuptree
+clone
 generate_spec
-fetch
 install_targets_depends
 build_rpm
 remove_installed_xrdp
