@@ -1,5 +1,5 @@
 #!/bin/bash
-# vim:ts=2:sw=2:sts=0
+# vim:ts=2:sw=2:sts=0:number
 VERSION=1.1.0
 RELEASEDATE=
 
