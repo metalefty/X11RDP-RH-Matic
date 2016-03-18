@@ -46,17 +46,19 @@ TARGETS="xrdp x11rdp"
 META_DEPENDS="rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.patch"
-XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libjpeg-devel libX11-devel libXfixes-devel libXrandr-devel fuse-devel which make"
 XRDP_CONFIGURE_ARGS="--enable-fuse --enable-rfxcodec --enable-jpeg"
 
 # flags
 PARALLELMAKE=true # increase make jobs
 INSTALL_XRDP=true # install built package after build
 
-# xorg driver build/run dependencies
-XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-xrdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
+# xrdp dependencies
+XRDP_BASIC_BUILD_DEPENDS=$(<SPECS/xrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
+XRDP_ADDITIONAL_BUILD_DEPENDS="libjpeg-turbo-devel fuse-devel"
+# xorg driver build dependencies
+XORGXRDP_BUILD_DEPENDS=$(<SPECS/xorg-x11-drv-xrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
 # x11rdp
-X11RDP_BUILD_DEPENDS=$(<SPECS/x11rdp.spec.in grep BuildRequires: | awk '{ print $2 }')
+X11RDP_BUILD_DEPENDS=$(<SPECS/x11rdp.spec.in grep BuildRequires: | awk '{ print $2 }' | tr '\n' ' ')
 
 SUDO_CMD()
 {
@@ -160,13 +162,13 @@ generate_spec()
 	done
 
 	sed -i.bak \
-	-e "s/%%BUILDREQUIRES%%/${XORG_DRIVER_BUILD_DEPENDS}/" \
+	-e "s/%%BUILDREQUIRES%%/${XORGXRDP_BUILD_DEPENDS}/g" \
 	${WRKDIR}/xorg-x11-drv-xrdp.spec || error_exit
 
 	sed -i.bak \
-	-e "s/%%BUILDREQUIRES%%/${XRDP_BUILD_DEPENDS}/g" \
+	-e "s/%%BUILDREQUIRES%%/${XRDP_ADDITIONAL_BUILD_DEPENDS}/g" \
 	-e "s/%%CONFIGURE_ARGS%%/${XRDP_CONFIGURE_ARGS}/g" \
-	${WRKDIR}/xrdp.spec ||  error_exit
+	${WRKDIR}/xrdp.spec || error_exit
 
 	sed -i.bak \
 	-e "s|%%X11RDPBASE%%|/opt/X11rdp|g" \
@@ -411,9 +413,9 @@ install_targets_depends()
 {
 	for t in $TARGETS; do
 		case "$t" in
-			xrdp) install_depends $XRDP_BUILD_DEPENDS ;;
+			xrdp) install_depends $XRDP_BASIC_BUILD_DEPENDS $XRDP_ADDITIONAL_BUILD_DEPENDS;;
 			x11rdp) install_depends $X11RDP_BUILD_DEPENDS ;;
-			xorg-x11-drv-xrdp) install_depends $XORG_DRIVER_DEPENDS ;;
+			xorg-x11-drv-xrdp) install_depends $XORGXRDP_BUILD_DEPENDS;;
 		esac
 	done
 }
