@@ -81,13 +81,13 @@ fi
 %{__rm} -rf %{buildroot}/etc/init.d %{buildroot}/etc/default
 
 # rsakeys.ini
-touch %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
-%{__chmod} 0600 %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
+%{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 
 %post
 # generate RSA key pair
-%{_bindir}/xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini 2048 >/dev/null
-%{__chmod} 0600 %{_sysconfdir}/xrdp/rsakeys.ini
+if [ ! -s %{_sysconfdir}/xrdp/rsakeys.ini ]; then
+    umask 077 && %{_bindir}/xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini 2048 >/dev/null
+fi
 %if 0%{?with_systemd}
 %systemd_post xrdp.service xrdp-sesman.service
 %else
@@ -151,4 +151,3 @@ rm -rf %{buildroot}
 # BUG upstream bug 
 #%{_initrddir}/*
 %endif
-%attr(0600,root,root) %verify(not size md5 mtime) %{_sysconfdir}/xrdp/rsakeys.ini
