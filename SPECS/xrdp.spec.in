@@ -67,6 +67,7 @@ fi
 ./bootstrap
 %configure \
 	%%CONFIGURE_ARGS%%
+%{__make} -C librfxcodec
 %{__make}
 
 %install
