@@ -34,9 +34,8 @@ Please report if you confirmed it works.
 
 - CentOS release 6.5 (Final)
 - CentOS release 6.6 (Final) reported by Michael Niehren
+- CentOS Linux release 7.2.1511 (Core)
 - Scientific Linux release 6.5 (Carbon)
-
-Now RHEL/CentOS 7 or later are experimentally supported.
 
 
 TODOs
