@@ -50,8 +50,9 @@ XRDP_BUILD_DEPENDS="autoconf automake libtool openssl-devel pam-devel libX11-dev
 XRDP_CONFIGURE_ARGS="--enable-fuse"
 
 # flags
-PARALLELMAKE=true # increase make jobs
-INSTALL_XRDP=true # install built package after build
+PARALLELMAKE=true   # increase make jobs
+INSTALL_XRDP=true   # install built package after build
+GIT_USE_HTTPS=false # Use firewall-friendly https:// instead of git:// to fetch git submodules
 
 # xorg driver build/run dependencies
 XORG_DRIVER_DEPENDS=$(<SPECS/xorg-x11-drv-rdp.spec.in grep Requires: | grep -v %% | awk '{ print $2 }')
@@ -184,8 +185,14 @@ fetch()
 	echo -n 'Fetching source code... '
 
 	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
-		git clone --recursive ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 && \
-		tar cfz ${WRKDIR}/${DISTFILE} -C ${WRKDIR} ${WRKSRC} && \
+		if $GIT_USE_HTTPS; then
+			git clone ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 || error_exit
+			sed -i -e 's|git://|https://|' ${WRKDIR}/${WRKSRC}/.gitmodules ${WRKDIR}/${WRKSRC}/.git/config
+			(cd ${WRKDIR}/${WRKSRC} && git submodule update --init --recursive)  >> $BUILD_LOG 2>&1
+		else
+			git clone --recursive ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 || error_exit
+		fi
+		tar cfz ${WRKDIR}/${DISTFILE} -C ${WRKDIR} ${WRKSRC} || error_exit
 		cp -a ${WRKDIR}/${DISTFILE} ${SOURCE_DIR}/${DISTFILE} || error_exit
 
 		echo 'done'
@@ -281,6 +288,7 @@ OPTIONS
                        --branch devel   - use the devel branch (Bleeding Edge - may not work properly!)
                        Branches beginning with \"v\" are stable releases.
                        The master branch changes when xrdp authors merge changes from the devel branch.
+  --https            : Use firewall-friendly https:// instead of git:// to fetch git submodules
   --nocpuoptimize    : do not change X11rdp build script to utilize more than 1 of your CPU cores.
   --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
   --noinstall        : do not install anything, just build the packages
@@ -313,6 +321,10 @@ OPTIONS
 				echo "Note : using the bleeding-edge version may result in problems :)"
 			fi
 			echo $LINE
+			;;
+
+		--https)
+			GIT_USE_HTTPS=true
 			;;
 
 		--noinstall)
