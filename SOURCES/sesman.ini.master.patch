@@ -1,6 +1,8 @@
---- neutrinolabs-xrdp-b55231f.orig/sesman/sesman.ini	2015-04-07 15:43:51.637776321 +0000
-+++ neutrinolabs-xrdp-b55231f/sesman/sesman.ini	2015-04-07 15:44:32.224776216 +0000
-@@ -81,12 +81,10 @@
+diff --git sesman/sesman.ini sesman/sesman.ini
+index a58af38..43943a3 100644
+--- sesman/sesman.ini
++++ sesman/sesman.ini
+@@ -81,12 +81,10 @@ param7=96
  [Xorg]
  param1=-config
  param2=xrdp/xorg.conf
