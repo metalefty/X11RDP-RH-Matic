@@ -107,11 +107,6 @@ install_depends()
 		check_if_installed $f
 		if [ $? -eq 0 ]; then
 			echo "yes"
-			if [ $f = "wget" ]; then
-				echo -n "Updating ${f}... "
-				SUDO_CMD yum -y update $f >> $YUM_LOG || error_exit
-				echo "done"
-			fi
 		else
 			echo "no"
 			echo -n "Installing $f... "
