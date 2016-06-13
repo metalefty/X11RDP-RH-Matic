@@ -45,7 +45,7 @@ SOURCE_DIR=$(rpm --eval %{_sourcedir})
 TARGETS="xrdp x11rdp"
 META_DEPENDS="rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
-EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.patch"
+EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.master.patch sesman.ini.devel.patch"
 XRDP_CONFIGURE_ARGS="--enable-fuse --enable-rfxcodec --enable-jpeg"
 
 # flags
