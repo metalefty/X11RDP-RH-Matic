@@ -62,3 +62,12 @@ $ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
 
 You'll probably be required to edit /etc/pam.d/xserver. See also
 [CentOS forum](https://www.centos.org/forums/viewtopic.php?t=21185).
+
+
+Contributing
+----
+
+First off, thanks for taking your time for improve X11RDP-RH-Matic.
+
+If you contribute to X11RDP-RH-Matic, checkout develop branch and make changes to the branch.
+Please make pull requests also versus develop branch.
