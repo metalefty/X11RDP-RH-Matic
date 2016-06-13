@@ -25,17 +25,23 @@ $ ./X11RDP-RH-Matic.sh
 
 Use develop branch to try development snapshot.
 
-Supported Distributions
+Supported Distributions (confirmed)
 ----
 
 Currently, X11RDP-RH-Matic is developed on CentOS 7 and tested following
 distributions. It may work on other RHEL clone distribution such as Oracle Linux.
 Please report if you confirmed it works.
 
+- Red Hat Enterprise Linux Server release 7.2 (Maipo)
 - CentOS release 6.5 (Final)
 - CentOS release 6.6 (Final) reported by Michael Niehren
 - CentOS Linux release 7.2.1511 (Core)
 - Scientific Linux release 6.5 (Carbon)
+
+Support policy
+---
+X11RDP-RH-Matic supports the latest major version and one previous version of RHEL and its clones.
+That is 7.x and 6.x as of June 13, 2016.
 
 
 TODOs
