@@ -53,6 +53,9 @@ PARALLELMAKE=true   # increase make jobs
 INSTALL_XRDP=true   # install built package after build
 GIT_USE_HTTPS=false # Use firewall-friendly https:// instead of git:// to fetch git submodules
 
+# substitutes
+XORGXRDPDEBUG_SUB="# "
+
 # xrdp dependencies
 XRDP_BASIC_BUILD_DEPENDS=$(<SPECS/xrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
 XRDP_ADDITIONAL_BUILD_DEPENDS="libjpeg-turbo-devel fuse-devel"
@@ -159,6 +162,7 @@ generate_spec()
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XORGXRDP_BUILD_DEPENDS}/g" \
+	-e "s/%%XORGXRDPDEBUG%%/${XORGXRDPDEBUG_SUB}/g" \
 	${WRKDIR}/xorg-x11-drv-xrdp.spec || error_exit
 
 	sed -i.bak \
@@ -291,6 +295,7 @@ OPTIONS
   --noinstall        : do not install anything, just build the packages
   --nox11rdp         : do not build and install x11rdp
   --with-xorg-driver : build and install xorg-driver
+  --xorgxrdpdebug    : increase log level of xorgxrdp
   --tmpdir <dir>     : specify working directory prefix (/tmp is default)"
 		get_branches
 		rmdir ${WRKDIR}
@@ -337,6 +342,10 @@ OPTIONS
 
 		--with-xorg-driver)
 			TARGETS="$TARGETS xorg-x11-drv-xrdp"
+			;;
+
+		--xorgxrdpdebug)
+			XORGXRDPDEBUG_SUB=""
 			;;
 
 		--tmpdir)
