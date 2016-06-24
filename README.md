@@ -37,6 +37,7 @@ Please report if you confirmed it works.
 - CentOS release 6.6 (Final) reported by Michael Niehren
 - CentOS Linux release 7.2.1511 (Core)
 - Scientific Linux release 6.5 (Carbon)
+- Asianux Server release 7 SP1 (Lotus)
 
 Support policy
 ---
