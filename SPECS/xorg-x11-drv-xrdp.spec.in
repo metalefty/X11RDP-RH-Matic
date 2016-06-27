@@ -43,17 +43,26 @@ Xorg X11 rdp driver for xrdp
 %{__make} install DESTDIR=%{buildroot}
 %{__install} -p -d -m 0755 %{buildroot}%{xrdpxorgconfdir}
 %{__install} -p -m 0644 xrdpdev/xorg.conf %{buildroot}%{xrdpxorgconfdir}
-%{__install} -p -d -m 0755 %{buildroot}%{_bindir}
-%{__install} -p -m 0755 %{_bindir}/Xorg %{buildroot}%{_bindir}/Xorg.xrdp
 find %{buildroot} -name \*.la -delete
 find %{buildroot} -name \*.a -delete
+
+%post
+if [ "$1" = "1" ]
+then
+%{__install} -p -m 0755 %{_bindir}/Xorg %{_bindir}/Xorg.xrdp
+fi
+
+%postun
+if [ "$1" = "0" ]
+then
+%{__rm} -f %{_bindir}/Xorg.xrdp
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}/Xorg.xrdp
 %{moduledir}/libxorgxrdp.so
 %{driverdir}/xrdpdev_drv.so
 %{inputdir}/xrdpmouse_drv.so
