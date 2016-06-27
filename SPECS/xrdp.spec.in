@@ -77,7 +77,7 @@ fi
 
 %install
 %{__make} install DESTDIR=%{buildroot}
-#installx xrdp initscript /etc/rc.d/init.d/xrdp
+#install xrdp initscript /etc/rc.d/init.d/xrdp
 %{__install} -Dp -m 755 %{SOURCE1} %{buildroot}%{_initddir}/xrdp
 #install xrdp sysconfig /etc/sysconfig/xrdp
 %{__install} -Dp -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/sysconfig/xrdp
@@ -85,7 +85,6 @@ fi
 %{__install} -Dp -m 644 %{SOURCE3} %{buildroot}%{_sysconfdir}/logrotate.d/xrdp
 # delete files installed for debian
 %{__rm} -rf %{buildroot}/etc/init.d %{buildroot}/etc/default
-
 # rsakeys.ini
 %{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 
@@ -102,6 +101,8 @@ if [ "$1" -eq "1" ]; then
     /sbin/chkconfig --add %{name}
 fi
 %endif
+# workaround for Red Hat Bug 1177202
+/usr/bin/chcon -t bin_t %{_sbindir}/xrdp %{_sbindir}/xrdp-sesman
 
 %preun
 %if 0%{?with_systemd}
