@@ -18,8 +18,9 @@ Source1:	xrdp.init
 Source2:	xrdp.sysconfig
 Source3:	xrdp.logrotate
 
-Patch0:		sesman.ini.patch
-Patch1:		xrdp-pam-auth.patch
+Patch0:		sesman.ini.master.patch
+Patch1:		sesman.ini.devel.patch
+Patch2:		xrdp-pam-auth.patch
 
 # Basic dependensies
 BuildRequires:	autoconf
@@ -55,11 +56,16 @@ RDP server for Linux
 
 %prep
 %setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%
-%patch0 -p 1
+if grep -q param0 sesman/sesman.ini
+then
+%patch1
+else
+%patch0
+fi
 # neutrinolabs/xrdp devel branch after 3934be9 does not require this patch.
 if [ -e instfiles/pam.d/xrdp-sesman ]
 then
-%patch1
+%patch2
 fi
 
 %build
@@ -71,7 +77,7 @@ fi
 
 %install
 %{__make} install DESTDIR=%{buildroot}
-#installx xrdp initscript /etc/rc.d/init.d/xrdp
+#install xrdp initscript /etc/rc.d/init.d/xrdp
 %{__install} -Dp -m 755 %{SOURCE1} %{buildroot}%{_initddir}/xrdp
 #install xrdp sysconfig /etc/sysconfig/xrdp
 %{__install} -Dp -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/sysconfig/xrdp
@@ -79,7 +85,6 @@ fi
 %{__install} -Dp -m 644 %{SOURCE3} %{buildroot}%{_sysconfdir}/logrotate.d/xrdp
 # delete files installed for debian
 %{__rm} -rf %{buildroot}/etc/init.d %{buildroot}/etc/default
-
 # rsakeys.ini
 %{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 
@@ -96,6 +101,8 @@ if [ "$1" -eq "1" ]; then
     /sbin/chkconfig --add %{name}
 fi
 %endif
+# workaround for Red Hat Bug 1177202
+/usr/bin/chcon -t bin_t %{_sbindir}/xrdp %{_sbindir}/xrdp-sesman
 
 %preun
 %if 0%{?with_systemd}

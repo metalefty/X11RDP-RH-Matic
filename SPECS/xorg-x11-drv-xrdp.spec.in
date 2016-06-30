@@ -32,6 +32,7 @@ Xorg X11 rdp driver for xrdp
 
 %prep
 %setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/xorgxrdp
+%%XORGXRDPDEBUG%%find . -type f | xargs sed -i.bak -e 's|#define LOG_LEVEL [0-9]*|#define LOG_LEVEL 20|'
 
 %build
 ./bootstrap
@@ -44,6 +45,18 @@ Xorg X11 rdp driver for xrdp
 %{__install} -p -m 0644 xrdpdev/xorg.conf %{buildroot}%{xrdpxorgconfdir}
 find %{buildroot} -name \*.la -delete
 find %{buildroot} -name \*.a -delete
+
+%post
+if [ "$1" = "1" ]
+then
+%{__install} -p -m 0755 %{_bindir}/Xorg %{_bindir}/Xorg.xrdp
+fi
+
+%postun
+if [ "$1" = "0" ]
+then
+%{__rm} -f %{_bindir}/Xorg.xrdp
+fi
 
 %clean
 %{__rm} -rf %{buildroot}

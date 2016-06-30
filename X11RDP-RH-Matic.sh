@@ -45,13 +45,16 @@ SOURCE_DIR=$(rpm --eval %{_sourcedir})
 TARGETS="xrdp x11rdp"
 META_DEPENDS="rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
-EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.patch"
+EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.master.patch sesman.ini.devel.patch"
 XRDP_CONFIGURE_ARGS="--enable-fuse --enable-rfxcodec --enable-jpeg"
 
 # flags
 PARALLELMAKE=true   # increase make jobs
 INSTALL_XRDP=true   # install built package after build
 GIT_USE_HTTPS=false # Use firewall-friendly https:// instead of git:// to fetch git submodules
+
+# substitutes
+XORGXRDPDEBUG_SUB="# "
 
 # xrdp dependencies
 XRDP_BASIC_BUILD_DEPENDS=$(<SPECS/xrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
@@ -107,11 +110,6 @@ install_depends()
 		check_if_installed $f
 		if [ $? -eq 0 ]; then
 			echo "yes"
-			if [ $f = "wget" ]; then
-				echo -n "Updating ${f}... "
-				SUDO_CMD yum -y update $f >> $YUM_LOG || error_exit
-				echo "done"
-			fi
 		else
 			echo "no"
 			echo -n "Installing $f... "
@@ -164,6 +162,7 @@ generate_spec()
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XORGXRDP_BUILD_DEPENDS}/g" \
+	-e "s/%%XORGXRDPDEBUG%%/${XORGXRDPDEBUG_SUB}/g" \
 	${WRKDIR}/xorg-x11-drv-xrdp.spec || error_exit
 
 	sed -i.bak \
@@ -296,6 +295,7 @@ OPTIONS
   --noinstall        : do not install anything, just build the packages
   --nox11rdp         : do not build and install x11rdp
   --with-xorg-driver : build and install xorg-driver
+  --xorgxrdpdebug    : increase log level of xorgxrdp
   --tmpdir <dir>     : specify working directory prefix (/tmp is default)"
 		get_branches
 		rmdir ${WRKDIR}
@@ -342,6 +342,10 @@ OPTIONS
 
 		--with-xorg-driver)
 			TARGETS="$TARGETS xorg-x11-drv-xrdp"
+			;;
+
+		--xorgxrdpdebug)
+			XORGXRDPDEBUG_SUB=""
 			;;
 
 		--tmpdir)
