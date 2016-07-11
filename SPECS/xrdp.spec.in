@@ -140,8 +140,8 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/pam.d/xrdp-sesman
 %config(noreplace) %{_sysconfdir}/logrotate.d/xrdp
 %config(noreplace) %{_sysconfdir}/sysconfig/xrdp
-%{_sysconfdir}/xrdp/pulse/*
-%{_sysconfdir}/xrdp/km-*.ini
+%config(noreplace) %{_sysconfdir}/xrdp/pulse/*
+%config(noreplace) %{_sysconfdir}/xrdp/km-*.ini
 %{_sysconfdir}/xrdp/*.sh
 %{_libdir}/xrdp/*
 %{_datadir}/xrdp/*
