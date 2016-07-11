@@ -344,6 +344,10 @@ OPTIONS
 			TARGETS="$TARGETS xorg-x11-drv-xrdp"
 			;;
 
+		--with-xorgxrdp) # alias for --with-xorg-driver
+			TARGETS="$TARGETS xorg-x11-drv-xrdp"
+			;;
+
 		--xorgxrdpdebug)
 			XORGXRDPDEBUG_SUB=""
 			;;
