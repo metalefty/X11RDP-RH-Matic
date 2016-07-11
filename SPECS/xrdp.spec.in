@@ -78,7 +78,9 @@ fi
 %install
 %{__make} install DESTDIR=%{buildroot}
 #install xrdp initscript /etc/rc.d/init.d/xrdp
+%if !%{with_systemd}
 %{__install} -Dp -m 755 %{SOURCE1} %{buildroot}%{_initddir}/xrdp
+%endif
 #install xrdp sysconfig /etc/sysconfig/xrdp
 %{__install} -Dp -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/sysconfig/xrdp
 #install logrotate /etc/logrotate.d/xrdp
@@ -148,13 +150,9 @@ rm -rf %{buildroot}
 %{_mandir}/man1/*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
-# BUG /etc/rc.d/init.d/xrdp is always installed even though it isn't necessary
-# BUG under systemd environment
-%{_initrddir}/*
 %if 0%{?with_systemd}
 %{_unitdir}/xrdp-sesman.service
 %{_unitdir}/xrdp.service
 %else
-# BUG upstream bug 
-#%{_initrddir}/*
+%{_initrddir}/*
 %endif
