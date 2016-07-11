@@ -90,6 +90,8 @@ fi
 # rsakeys.ini
 %{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
 
+find %{buildroot} -name '*.la' -delete
+
 %post
 # generate RSA key pair
 if [ ! -s %{_sysconfdir}/xrdp/rsakeys.ini ]; then
