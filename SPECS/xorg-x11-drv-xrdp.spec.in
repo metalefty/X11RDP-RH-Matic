@@ -67,4 +67,4 @@ fi
 %{driverdir}/xrdpdev_drv.so
 %{inputdir}/xrdpmouse_drv.so
 %{inputdir}/xrdpkeyb_drv.so
-%{xrdpxorgconfdir}/xorg.conf
+%config(noreplace) %{xrdpxorgconfdir}/xorg.conf
