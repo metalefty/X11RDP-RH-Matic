@@ -48,22 +48,21 @@ That is 7.x and 6.x as of June 13, 2016.
 TODOs
 ----
 
-There's nothing major TODOs so far.
+- Build PulseAudio module
 
-
-Experimental Features
+Building xorgxrdp (formerly known as xorg-driver)
 ----
-X11RDP-RH-Matic experimentally supports the build of xrdp xorg driver. Run with
-"--with-xorg-driver" option. When you want to build xorg driver, probably you
-don't need X11rdp then also add "--nox11rdp" option.
+X11RDP-RH-Matic can build xorgxrdp (aka xorg-driver). Run with `--with-xorg-driver`
+option. When you want to build xorgxrdp, probably you don't need X11rdp then also
+add `--nox11rdp` option.
 
 ```
 $ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
 ```
 
-You'll probably be required to edit /etc/pam.d/xserver. See also
+Now RH-Matic installs non-suid version of Xorg to `/usr/bin/Xorg.xrdp`.
+You don't need to edit `/etc/pam.d/xserver` introduced in
 [CentOS forum](https://www.centos.org/forums/viewtopic.php?t=21185).
-
 
 Contributing
 ----

@@ -10,7 +10,7 @@
 Summary:	Open source Remote Desktop Protocol (RDP) server
 Name:		xrdp
 Version:	%{xrdpver}+%{xrdpbranch}
-License:	Apache License 2.0
+License:	ASL 2.0
 Release:	1%{?dist}
 URL:		http://www.xrdp.org/
 Source0:	%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
@@ -78,7 +78,9 @@ fi
 %install
 %{__make} install DESTDIR=%{buildroot}
 #install xrdp initscript /etc/rc.d/init.d/xrdp
+%if !%{with_systemd}
 %{__install} -Dp -m 755 %{SOURCE1} %{buildroot}%{_initddir}/xrdp
+%endif
 #install xrdp sysconfig /etc/sysconfig/xrdp
 %{__install} -Dp -m 644 %{SOURCE2} %{buildroot}%{_sysconfdir}/sysconfig/xrdp
 #install logrotate /etc/logrotate.d/xrdp
@@ -87,6 +89,8 @@ fi
 %{__rm} -rf %{buildroot}/etc/init.d %{buildroot}/etc/default
 # rsakeys.ini
 %{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
+
+find %{buildroot} -name '*.la' -delete
 
 %post
 # generate RSA key pair
@@ -138,8 +142,8 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/pam.d/xrdp-sesman
 %config(noreplace) %{_sysconfdir}/logrotate.d/xrdp
 %config(noreplace) %{_sysconfdir}/sysconfig/xrdp
-%{_sysconfdir}/xrdp/pulse/*
-%{_sysconfdir}/xrdp/km-*.ini
+%config(noreplace) %{_sysconfdir}/xrdp/pulse/*
+%config(noreplace) %{_sysconfdir}/xrdp/km-*.ini
 %{_sysconfdir}/xrdp/*.sh
 %{_libdir}/xrdp/*
 %{_datadir}/xrdp/*
@@ -148,13 +152,9 @@ rm -rf %{buildroot}
 %{_mandir}/man1/*
 %{_mandir}/man5/*
 %{_mandir}/man8/*
-# BUG /etc/rc.d/init.d/xrdp is always installed even though it isn't necessary
-# BUG under systemd environment
-%{_initrddir}/*
 %if 0%{?with_systemd}
 %{_unitdir}/xrdp-sesman.service
 %{_unitdir}/xrdp.service
 %else
-# BUG upstream bug 
-#%{_initrddir}/*
+%{_initrddir}/*
 %endif
