@@ -1,7 +1,7 @@
 #!/bin/bash
 # vim:ts=2:sw=2:sts=0:number
-VERSION=1.1.0
-RELEASEDATE=
+VERSION=2.0.0
+RELEASEDATE=20160725
 
 trap user_interrupt_exit 2
 
@@ -371,7 +371,7 @@ OPTIONS
 
 show_version()
 {
-	echo $0 $VERSION
+	echo "X11RDP-RH-Matic $VERSION $RELEASEDATE"
 	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 0
 }
