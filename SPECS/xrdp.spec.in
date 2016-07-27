@@ -106,6 +106,7 @@ if [ "$1" -eq "1" ]; then
 fi
 %endif
 # workaround for Red Hat Bug 1177202
+# https://bugzilla.redhat.com/show_bug.cgi?id=1177202
 /usr/bin/chcon -t bin_t %{_sbindir}/xrdp %{_sbindir}/xrdp-sesman
 
 %preun
