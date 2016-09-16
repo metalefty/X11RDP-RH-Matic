@@ -1,3 +1,9 @@
+2.0.1
+-----
+- Disable librfxcodec as it is still unstable
+- Fix the build failure on EL6 (using EPEL)
+
+
 2.0.0
 -----
 Lots of changes :p

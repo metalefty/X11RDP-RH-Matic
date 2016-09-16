@@ -1,7 +1,7 @@
 #!/bin/bash
 # vim:ts=2:sw=2:sts=0:number
-VERSION=2.0.0
-RELEASEDATE=20160725
+VERSION=2.0.1
+RELEASEDATE=20160916
 
 trap user_interrupt_exit 2
 
@@ -46,12 +46,13 @@ TARGETS="xrdp x11rdp"
 META_DEPENDS="rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.master.patch sesman.ini.devel.patch"
-XRDP_CONFIGURE_ARGS="--enable-fuse --enable-rfxcodec --enable-jpeg --disable-static"
+XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --disable-static"
 
 # flags
 PARALLELMAKE=true   # increase make jobs
 INSTALL_XRDP=true   # install built package after build
 GIT_USE_HTTPS=false # Use firewall-friendly https:// instead of git:// to fetch git submodules
+IS_EL6=$([ "$(rpm --eval %{?rhel})" -le 6 ] && echo true || echo false)
 
 # substitutes
 XORGXRDPDEBUG_SUB="# "
@@ -175,6 +176,12 @@ generate_spec()
 	-e "s|make -j1|${makeCommand}|g" \
 	${WRKDIR}/x11rdp.spec || error_exit
 
+	if $IS_EL6; then
+		sed -i.bak \
+		-e 's|\(^BuildRequires:\s*\)\(autoconf\)|\1autoconf268|' \
+		${WRKDIR}/xrdp.spec || error_exit
+	fi
+
 	echo 'done'
 }
 
@@ -192,6 +199,9 @@ clone()
 			(cd ${WRKDIR}/${WRKSRC} && git submodule update --init --recursive)  >> $BUILD_LOG 2>&1
 		else
 			git clone --recursive ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 || error_exit
+		fi
+		if $IS_EL6; then
+			sed -i -e 's|autoreconf|autoreconf268|' ${WRKDIR}/${WRKSRC}/bootstrap
 		fi
 		tar cfz ${WRKDIR}/${DISTFILE} -C ${WRKDIR} ${WRKSRC} || error_exit
 		cp -a ${WRKDIR}/${DISTFILE} ${SOURCE_DIR}/${DISTFILE} || error_exit
@@ -472,6 +482,17 @@ first_of_all()
 		echo 'no'
 		echo -n 'Installing yum-utils... '
 		SUDO_CMD yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1
+	fi
+
+	if $IS_EL6; then
+		check_if_installed epel-release
+		if [ $? -ne 0 ]; then
+			echo "You are using $(cat /etc/redhat-release)."
+			echo '"epel-release" is needed to run this script.'
+			echo -n 'Installing epel-release...'
+			SUDO_CMD yum -y install epel-release >> $YUM_LOG && echo 'done' || exit 1
+		fi
+		XRDP_BASIC_BUILD_DEPENDS=${XRDP_BASIC_BUILD_DEPENDS/autoconf /autoconf268 }
 	fi
 }
 
