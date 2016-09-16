@@ -1,7 +1,7 @@
 #!/bin/bash
 # vim:ts=2:sw=2:sts=0:number
-VERSION=2.0.0
-RELEASEDATE=20160725
+VERSION=2.0.1
+RELEASEDATE=20160916
 
 trap user_interrupt_exit 2
 
