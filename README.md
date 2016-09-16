@@ -1,4 +1,4 @@
-X11RDP-RH-Matic
+X11RDP-RH-Matic  [![Build Status](https://travis-ci.org/metalefty/X11RDP-RH-Matic.svg?branch=develop)](https://travis-ci.org/metalefty/X11RDP-RH-Matic)
 ===============
 
 What is this?
