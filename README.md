@@ -71,3 +71,18 @@ First off, thanks for taking your time for improve X11RDP-RH-Matic.
 
 If you contribute to X11RDP-RH-Matic, checkout develop branch and make changes to the branch.
 Please make pull requests also versus develop branch.
+
+Development
+----
+
+To test X11RDP-RH-Matic, you can quickly prepare test environment using docker.
+
+~~~
+docker-host$ sudo docker pull centos:latest
+docker-host$ sudo docker run --rm --interactive --tty centos:latest /bin/bash
+docker-guest# adduser centos
+docker-guest# usermod -G wheel centos
+docker-guest# yum install -y sudo git
+docker-guest# sudo -i -u centos
+docker-guest$ git clone --branch develop https://github.com/metalefty/X11RDP-RH-Matic.git
+~~~
