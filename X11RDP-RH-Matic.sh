@@ -51,7 +51,7 @@ XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --disable-static"
 # flags
 PARALLELMAKE=true   # increase make jobs
 INSTALL_XRDP=true   # install built package after build
-GIT_USE_HTTPS=false # Use firewall-friendly https:// instead of git:// to fetch git submodules
+GIT_USE_HTTPS=true  # Use firewall-friendly https:// instead of git:// to fetch git submodules
 IS_EL6=$([ "$(rpm --eval %{?rhel})" -le 6 ] && echo true || echo false)
 
 # substitutes
@@ -299,7 +299,7 @@ OPTIONS
                        --branch devel   - use the devel branch (Bleeding Edge - may not work properly!)
                        Branches beginning with \"v\" are stable releases.
                        The master branch changes when xrdp authors merge changes from the devel branch.
-  --https            : Use firewall-friendly https:// instead of git:// to fetch git submodules
+  --https            : Use firewall-friendly https:// instead of git:// to fetch git submodules (OBSOLETED).
   --nocpuoptimize    : do not change X11rdp build script to utilize more than 1 of your CPU cores.
   --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
   --noinstall        : do not install anything, just build the packages
@@ -335,7 +335,7 @@ OPTIONS
 			;;
 
 		--https)
-			GIT_USE_HTTPS=true
+			echo_stderr 'WARNING: now https is always used to fetch sources. --https option is no longer effective.'
 			;;
 
 		--noinstall)
