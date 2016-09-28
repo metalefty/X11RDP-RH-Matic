@@ -303,7 +303,8 @@ OPTIONS
   --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
   --noinstall        : do not install anything, just build the packages
   --nox11rdp         : do not build and install x11rdp
-  --with-xorg-driver : build and install xorg-driver
+  --with-xorgxrdp    : build xorgxrdp (formerly known as xorg-driver)
+  --with-xorg-driver : alias for --with-xorgxrdp
   --xorgxrdpdebug    : increase log level of xorgxrdp
   --tmpdir <dir>     : specify working directory prefix (/tmp is default)"
 		get_branches
@@ -349,11 +350,12 @@ OPTIONS
 			TARGETS=${TARGETS//x11rdp/}
 			;;
 
-		--with-xorg-driver)
+		--with-xorg-driver) # alias for --with-xorgxrdp
+			echo_stderr 'WARNING: --with-xorg-driver was renamed to --with-xorgxrdp'
 			TARGETS="$TARGETS xorg-x11-drv-xrdp"
 			;;
 
-		--with-xorgxrdp) # alias for --with-xorg-driver
+		--with-xorgxrdp)
 			TARGETS="$TARGETS xorg-x11-drv-xrdp"
 			;;
 
