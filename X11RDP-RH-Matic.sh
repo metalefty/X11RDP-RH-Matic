@@ -286,7 +286,6 @@ parse_commandline_args()
 	# If first switch = --help, display the help/usage message then exit.
 	if [ "$1" = "--help" ]
 	then
-		clear
 		echo "usage: $0 OPTIONS
 OPTIONS
 -------
@@ -452,7 +451,6 @@ install_targets_depends()
 
 first_of_all()
 {
-	clear
 	if [ ! -f X11RDP-RH-Matic.sh ]; then
 		echo_stderr "Make sure you are in X11RDP-RH-Matic directory." 2>&1
 		error_exit
