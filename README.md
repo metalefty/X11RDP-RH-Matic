@@ -25,6 +25,15 @@ $ ./X11RDP-RH-Matic.sh
 
 Use develop branch to try development snapshot.
 
+X11RDP-RH-Matic uses official neutrinolabs repository by default.
+If you want to build your own fork or other repository,
+you can override GitHub account, repository and branch via environment variable.
+
+```
+$ GH_ACCOUNT=metalefty ./X11RDP-RH-Matic.sh # uses https://github.com/metalefty/xrdp.git
+$ GH_BRANCH=devel ./X11RDP-RH-Matic.sh      # equivalent to ./X11RDP-RH-Matic.sh --branch devel
+```
+
 Supported Distributions (confirmed)
 ----
 
