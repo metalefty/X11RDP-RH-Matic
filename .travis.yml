@@ -7,6 +7,7 @@ env:
     - OS_TYPE=centos OS_VERSION=6 BRANCH=devel
     - OS_TYPE=centos OS_VERSION=7 BRANCH=master
     - OS_TYPE=centos OS_VERSION=7 BRANCH=devel
+    - OS_TYPE=centos OS_VERSION=7 BRANCH=devel  GH_ACCOUNT=metalefty
 
 services:
   - docker
