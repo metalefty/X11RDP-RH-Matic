@@ -28,9 +28,9 @@ LINE="----------------------------------------------------------------------"
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
 # xrdp repository
-GH_ACCOUNT=neutrinolabs
-GH_PROJECT=xrdp
-GH_BRANCH=master
+: ${GH_ACCOUNT:=neutrinolabs}
+: ${GH_PROJECT:=xrdp}
+: ${GH_BRANCH:=master}
 GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
 
 WRKDIR=$(mktemp --directory --suffix .X11RDP-RH-Matic)
