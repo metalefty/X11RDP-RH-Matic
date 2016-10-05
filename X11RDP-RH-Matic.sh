@@ -34,6 +34,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin
 : ${GH_BRANCH:=master}
 GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
 
+OLDWRKDIR=''
 WRKDIR=$(mktemp --directory --suffix .X11RDP-RH-Matic)
 YUM_LOG=${WRKDIR}/yum.log
 BUILD_LOG=${WRKDIR}/build.log
