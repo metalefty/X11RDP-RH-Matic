@@ -375,7 +375,7 @@ OPTIONS
 			YUM_LOG=${WRKDIR}/yum.log
 			BUILD_LOG=${WRKDIR}/build.log
 			SUDO_LOG=${WRKDIR}/sudo.log
-			rmdir ${OLDWRKDIR}
+			rmdir "${OLDWRKDIR}" || error_exit
 			;;
 		esac
 		shift
