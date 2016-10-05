@@ -134,9 +134,7 @@ check_if_installed()
 calculate_version_num()
 {
 	echo -n 'Calculating RPM version number... '
-	if [ ! -e ${WRKDIR}/${WRKSRC} ]; then
-		tar zxf ${SOURCE_DIR}/${DISTFILE} -C ${WRKDIR} || error_exit
-	fi
+
 	XRDPVER=$(cd ${WRKDIR}/${WRKSRC}; grep xrdp readme.txt | head -1 | cut -d " " -f2)
 	XORGXRDPVER=${XRDPVER}.git$(cd ${WRKDIR}/${WRKSRC}/xorgxrdp; git rev-parse HEAD | head -c7)
 	XRDPVER=${XRDPVER}.git${GH_COMMIT}
@@ -211,6 +209,9 @@ clone()
 		echo 'done'
 	else
 		echo 'already exists'
+		echo -n 'Unpacking previously cloned source code... '
+		tar zxf ${SOURCE_DIR}/${DISTFILE} -C ${WRKDIR} || error_exit
+		echo 'done'
 	fi
 }
 
