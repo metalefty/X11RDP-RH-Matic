@@ -1,4 +1,5 @@
 #!/bin/bash
+set -u # error unbound variables
 # vim:ts=2:sw=2:sts=0:number
 VERSION=2.0.1
 RELEASEDATE=20160916
