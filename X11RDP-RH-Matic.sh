@@ -98,6 +98,12 @@ error_exit()
 	exit 1
 }
 
+clean_exit()
+{
+	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
+	exit 0
+}
+
 user_interrupt_exit()
 {
 	echo_stderr; echo_stderr
@@ -514,5 +520,4 @@ build_rpm
 remove_installed_xrdp
 install_built_xrdp
 
-[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
-exit 0
+clean_exit
