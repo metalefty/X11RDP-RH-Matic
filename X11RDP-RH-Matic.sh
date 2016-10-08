@@ -40,7 +40,6 @@ YUM_LOG=${WRKDIR}/yum.log
 BUILD_LOG=${WRKDIR}/build.log
 SUDO_LOG=${WRKDIR}/sudo.log
 RPMS_DIR=$(rpm --eval %{_rpmdir}/%{_arch})
-BUILD_DIR=$(rpm --eval %{_builddir})
 SOURCE_DIR=$(rpm --eval %{_sourcedir})
 
 # variables for this utility
@@ -93,7 +92,7 @@ error_exit()
 	echo_stderr "	$BUILD_LOG"
 	echo_stderr "	$SUDO_LOG"
 	echo_stderr "	$YUM_LOG"
-	echo_stderr "Exitting..."
+	echo_stderr "Exiting..."
 	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
 }
@@ -107,7 +106,7 @@ clean_exit()
 user_interrupt_exit()
 {
 	echo_stderr; echo_stderr
-	echo_stderr "Script stopped due to user interrupt, exitting..."
+	echo_stderr "Script stopped due to user interrupt, exiting..."
 	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
 }
