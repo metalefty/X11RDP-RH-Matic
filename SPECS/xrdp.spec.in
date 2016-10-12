@@ -72,10 +72,15 @@ fi
 if [ -d libpainter ]; then
 	(cd libpainter; ./bootstrap; ./configure; make)
 fi
+if [ -f librfxcodec/bootstrap ]; then
+	(cd librfxcodec && ./bootstrap && ./configure && %{__make})
+elif [ -f librfxcodec/Makefile ]; then
+	%{__make} -C librfxcodec
+fi
 ./bootstrap
 %configure \
 	%%CONFIGURE_ARGS%%
-%{__make} -C librfxcodec
+
 %{__make}
 
 %install
