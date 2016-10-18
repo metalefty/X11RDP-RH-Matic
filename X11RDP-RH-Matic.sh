@@ -518,5 +518,5 @@ install_targets_depends
 build_rpm
 remove_installed_xrdp
 install_built_xrdp
-
+echo; echo 'Everything is done!'
 clean_exit
