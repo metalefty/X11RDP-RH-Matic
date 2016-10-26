@@ -192,7 +192,7 @@ generate_spec()
 
 clone()
 {
-	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep $GH_BRANCH | head -c7)
+	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep ${GH_BRANCH}$ | head -c7)
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
 	echo -n 'Cloning source code... '
