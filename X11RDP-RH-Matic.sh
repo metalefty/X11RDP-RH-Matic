@@ -1,4 +1,5 @@
 #!/bin/bash
+#set -u # error unbound variables
 # vim:ts=2:sw=2:sts=0:number
 VERSION=2.0.1
 RELEASEDATE=20160916
@@ -28,17 +29,17 @@ LINE="----------------------------------------------------------------------"
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
 # xrdp repository
-GH_ACCOUNT=neutrinolabs
-GH_PROJECT=xrdp
-GH_BRANCH=master
+: ${GH_ACCOUNT:=neutrinolabs}
+: ${GH_PROJECT:=xrdp}
+: ${GH_BRANCH:=master}
 GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
 
+OLDWRKDIR=''
 WRKDIR=$(mktemp --directory --suffix .X11RDP-RH-Matic)
 YUM_LOG=${WRKDIR}/yum.log
 BUILD_LOG=${WRKDIR}/build.log
 SUDO_LOG=${WRKDIR}/sudo.log
 RPMS_DIR=$(rpm --eval %{_rpmdir}/%{_arch})
-BUILD_DIR=$(rpm --eval %{_builddir})
 SOURCE_DIR=$(rpm --eval %{_sourcedir})
 
 # variables for this utility
@@ -51,7 +52,7 @@ XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --disable-static"
 # flags
 PARALLELMAKE=true   # increase make jobs
 INSTALL_XRDP=true   # install built package after build
-GIT_USE_HTTPS=false # Use firewall-friendly https:// instead of git:// to fetch git submodules
+GIT_USE_HTTPS=true  # Use firewall-friendly https:// instead of git:// to fetch git submodules
 IS_EL6=$([ "$(rpm --eval %{?rhel})" -le 6 ] && echo true || echo false)
 
 # substitutes
@@ -91,15 +92,21 @@ error_exit()
 	echo_stderr "	$BUILD_LOG"
 	echo_stderr "	$SUDO_LOG"
 	echo_stderr "	$YUM_LOG"
-	echo_stderr "Exitting..."
+	echo_stderr "Exiting..."
 	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
+}
+
+clean_exit()
+{
+	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
+	exit 0
 }
 
 user_interrupt_exit()
 {
 	echo_stderr; echo_stderr
-	echo_stderr "Script stopped due to user interrupt, exitting..."
+	echo_stderr "Script stopped due to user interrupt, exiting..."
 	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
 }
@@ -132,9 +139,7 @@ check_if_installed()
 calculate_version_num()
 {
 	echo -n 'Calculating RPM version number... '
-	if [ -e ${WRKDIR}/${WRKWRC} ]; then
-		tar zxf ${SOURCE_DIR}/${DISTFILE} -C ${WRKDIR} || error_exit
-	fi
+
 	XRDPVER=$(cd ${WRKDIR}/${WRKSRC}; grep xrdp readme.txt | head -1 | cut -d " " -f2)
 	XORGXRDPVER=${XRDPVER}.git$(cd ${WRKDIR}/${WRKSRC}/xorgxrdp; git rev-parse HEAD | head -c7)
 	XRDPVER=${XRDPVER}.git${GH_COMMIT}
@@ -187,7 +192,7 @@ generate_spec()
 
 clone()
 {
-	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep $GH_BRANCH | head -c7)
+	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep ${GH_BRANCH}$ | head -c7)
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
 	echo -n 'Cloning source code... '
@@ -209,6 +214,9 @@ clone()
 		echo 'done'
 	else
 		echo 'already exists'
+		echo -n 'Unpacking previously cloned source code... '
+		tar zxf ${SOURCE_DIR}/${DISTFILE} -C ${WRKDIR} || error_exit
+		echo 'done'
 	fi
 }
 
@@ -286,7 +294,6 @@ parse_commandline_args()
 	# If first switch = --help, display the help/usage message then exit.
 	if [ "$1" = "--help" ]
 	then
-		clear
 		echo "usage: $0 OPTIONS
 OPTIONS
 -------
@@ -299,12 +306,13 @@ OPTIONS
                        --branch devel   - use the devel branch (Bleeding Edge - may not work properly!)
                        Branches beginning with \"v\" are stable releases.
                        The master branch changes when xrdp authors merge changes from the devel branch.
-  --https            : Use firewall-friendly https:// instead of git:// to fetch git submodules
+  --https            : Use firewall-friendly https:// instead of git:// to fetch git submodules (OBSOLETED).
   --nocpuoptimize    : do not change X11rdp build script to utilize more than 1 of your CPU cores.
   --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
   --noinstall        : do not install anything, just build the packages
   --nox11rdp         : do not build and install x11rdp
-  --with-xorg-driver : build and install xorg-driver
+  --with-xorgxrdp    : build xorgxrdp (formerly known as xorg-driver)
+  --with-xorg-driver : alias for --with-xorgxrdp
   --xorgxrdpdebug    : increase log level of xorgxrdp
   --tmpdir <dir>     : specify working directory prefix (/tmp is default)"
 		get_branches
@@ -335,7 +343,7 @@ OPTIONS
 			;;
 
 		--https)
-			GIT_USE_HTTPS=true
+			echo_stderr 'WARNING: now https is always used to fetch sources. --https option is no longer effective.'
 			;;
 
 		--noinstall)
@@ -350,11 +358,12 @@ OPTIONS
 			TARGETS=${TARGETS//x11rdp/}
 			;;
 
-		--with-xorg-driver)
+		--with-xorg-driver) # alias for --with-xorgxrdp
+			echo_stderr 'WARNING: --with-xorg-driver was renamed to --with-xorgxrdp'
 			TARGETS="$TARGETS xorg-x11-drv-xrdp"
 			;;
 
-		--with-xorgxrdp) # alias for --with-xorg-driver
+		--with-xorgxrdp)
 			TARGETS="$TARGETS xorg-x11-drv-xrdp"
 			;;
 
@@ -372,7 +381,7 @@ OPTIONS
 			YUM_LOG=${WRKDIR}/yum.log
 			BUILD_LOG=${WRKDIR}/build.log
 			SUDO_LOG=${WRKDIR}/sudo.log
-			rmdir ${OLDWRKDIR}
+			rmdir "${OLDWRKDIR}" || error_exit
 			;;
 		esac
 		shift
@@ -452,7 +461,6 @@ install_targets_depends()
 
 first_of_all()
 {
-	clear
 	if [ ! -f X11RDP-RH-Matic.sh ]; then
 		echo_stderr "Make sure you are in X11RDP-RH-Matic directory." 2>&1
 		error_exit
@@ -510,6 +518,5 @@ install_targets_depends
 build_rpm
 remove_installed_xrdp
 install_built_xrdp
-
-[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
-exit 0
+echo; echo 'Everything is done!'
+clean_exit

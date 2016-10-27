@@ -1,3 +1,15 @@
+2.0.2
+-----
+- Default to use https to fetch source code
+- `--with-xorg-driver` option is replaced with `--with-xorgxrdp`
+- GitHub account/project/branch are now configurable by environment variable
+- Improve build of librfxcodec, libpainter
+- Fix the build on EL6
+- other trivial fixes
+
+Thanks to
+- Pavel Roskin
+
 2.0.1
 -----
 - Disable librfxcodec as it is still unstable
