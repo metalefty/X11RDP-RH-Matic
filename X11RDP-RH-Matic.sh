@@ -153,13 +153,15 @@ generate_spec()
 	calc_cpu_cores
 	echo -n 'Generating RPM spec files... '
 
+	GH_BRANCH_IN_PKGNAME=$(echo ${GH_BRANCH} |  sed -e 's|[^A-Za-z0-9._\+]|_|g')
+
 	# replace common variables in spec templates
 	for f in SPECS/*.spec.in
 	do
 		sed \
 		-e "s/%%XRDPVER%%/${XRDPVER}/g" \
 		-e "s/%%XORGXRDPVER%%/${XORGXRDPVER}/g" \
-		-e "s/%%XRDPBRANCH%%/${GH_BRANCH//-/_}/g" \
+		-e "s/%%XRDPBRANCH%%/${GH_BRANCH_IN_PKGNAME}/g" \
 		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
 		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
 		-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
@@ -438,9 +440,9 @@ install_built_xrdp()
 		echo -n "Installing built $t... "
 		case "$t" in
 			xorg-x11-drv-xrdp)
-				RPM_VERSION_SUFFIX=$(rpm --eval -${XORGXRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm) ;;
+				RPM_VERSION_SUFFIX=$(rpm --eval -${XORGXRDPVER}+${GH_BRANCH_IN_PKGNAME}-1%{?dist}.%{_arch}.rpm) ;;
 			*)
-				RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH//-/_}-1%{?dist}.%{_arch}.rpm) ;;
+				RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH_IN_PKGNAME}-1%{?dist}.%{_arch}.rpm) ;;
 		esac
 		SUDO_CMD yum -y localinstall \
 			${RPMS_DIR}/${t}${RPM_VERSION_SUFFIX} \
