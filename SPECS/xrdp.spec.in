@@ -33,6 +33,7 @@ BuildRequires:	libXfixes-devel
 BuildRequires:	libXrandr-devel
 BuildRequires:	which
 BuildRequires:	make
+BuildRequires:	nasm
 # Additional dependencies which vary on depending on build options
 BuildRequires:	%%BUILDREQUIRES%%
 # Runtime dependencies
