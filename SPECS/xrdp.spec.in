@@ -33,6 +33,7 @@ BuildRequires:	libXfixes-devel
 BuildRequires:	libXrandr-devel
 BuildRequires:	which
 BuildRequires:	make
+BuildRequires:	nasm
 # Additional dependencies which vary on depending on build options
 BuildRequires:	%%BUILDREQUIRES%%
 # Runtime dependencies
@@ -85,6 +86,12 @@ fi
 
 %install
 %{__make} install DESTDIR=%{buildroot}
+find %{buildroot} -name '*.la' -delete
+# workaround to support after 1fe368c5b3fa05f287731e57d748afb4556d554f and before
+%{__mkdir} -p %{buildroot}%{_includedir}
+if [ ! -f %{buildroot}%{_includedir}/xrdp_client_info.h ]; then
+%{__install} -c -m 644 common/xrdp_{client_info,constants,rail}.h %{buildroot}%{_includedir}
+fi
 #install xrdp initscript /etc/rc.d/init.d/xrdp
 %if !%{with_systemd}
 %{__install} -Dp -m 755 %{SOURCE1} %{buildroot}%{_initddir}/xrdp
@@ -97,8 +104,6 @@ fi
 %{__rm} -rf %{buildroot}/etc/init.d %{buildroot}/etc/default
 # rsakeys.ini
 %{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
-
-find %{buildroot} -name '*.la' -delete
 
 %post
 # generate RSA key pair
@@ -158,6 +163,7 @@ rm -rf %{buildroot}
 %{_datadir}/xrdp/*
 %{_sbindir}/*
 %{_bindir}/*
+%{_includedir}/*
 %{_mandir}/man1/*
 %{_mandir}/man5/*
 %{_mandir}/man8/*

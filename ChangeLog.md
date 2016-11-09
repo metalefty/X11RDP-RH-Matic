@@ -1,3 +1,9 @@
+2.0.3
+-----
+- Sanitize git branch name to use it in package name
+- Fix dependencies
+- Update patches to fit upstream
+
 2.0.2
 -----
 - Default to use https to fetch source code
