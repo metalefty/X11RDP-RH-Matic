@@ -1,3 +1,7 @@
+2.0.4
+-----
+- Fix the build failure not fixed in 2.0.3
+
 2.0.3
 -----
 - Sanitize git branch name to use it in package name
