@@ -26,6 +26,7 @@ Patch2:		xrdp-pam-auth.patch
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libtool
+BuildRequires:	openssl
 BuildRequires:	openssl-devel
 BuildRequires:	pam-devel
 BuildRequires:	libX11-devel
