@@ -102,13 +102,23 @@ fi
 %{__install} -Dp -m 644 %{SOURCE3} %{buildroot}%{_sysconfdir}/logrotate.d/xrdp
 # delete files installed for debian
 %{__rm} -rf %{buildroot}/etc/init.d %{buildroot}/etc/default
-# rsakeys.ini
+# delete keys, certificates
 %{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/rsakeys.ini
+%{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/cert.pem
+%{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/key.pem
 
 %post
 # generate RSA key pair
 if [ ! -s %{_sysconfdir}/xrdp/rsakeys.ini ]; then
     umask 077 && %{_bindir}/xrdp-keygen xrdp %{_sysconfdir}/xrdp/rsakeys.ini 2048 >/dev/null
+fi
+# generate certificate
+if [ ! -f %{_sysconfdir}/xrdp/cert.pem -a ! -f %{_sysconfdir}/xrdp/key.pem ]; then
+    openssl req -x509 \
+      -newkey rsa:2048 -nodes -sha256 \
+      -keyout %{_sysconfdir}/cert/key.pem \
+      -out %{_sysconfdir}/xrdp/cert.pem \
+      -days 365 -subj /CN=$(hostname)
 fi
 %if 0%{?with_systemd}
 %systemd_post xrdp.service xrdp-sesman.service
