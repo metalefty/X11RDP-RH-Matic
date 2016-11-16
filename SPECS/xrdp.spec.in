@@ -57,7 +57,7 @@ RDP server for Linux
 
 %prep
 %setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%
-if grep -q param0 sesman/sesman.ini
+if grep -q param= sesman/sesman.ini
 then
 %patch1
 else
