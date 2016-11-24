@@ -171,6 +171,8 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/xrdp/km-*.ini
 %{_sysconfdir}/xrdp/*.sh
 %{_libdir}/xrdp/*
+# devel: pkgconfig files
+%{_libdir}/*
 %{_datadir}/xrdp/*
 %{_sbindir}/*
 %{_bindir}/*

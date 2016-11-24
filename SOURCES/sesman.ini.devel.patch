@@ -1,8 +1,8 @@
 diff --git sesman/sesman.ini sesman/sesman.ini
-index 5e70225..79bfde9 100644
+index 140cc49..22dc4bf 100644
 --- sesman/sesman.ini
 +++ sesman/sesman.ini
-@@ -81,15 +81,15 @@ param=-dpi
+@@ -78,14 +78,14 @@ param=-dpi
  param=96
 
  [Xorg]
@@ -11,7 +11,6 @@ index 5e70225..79bfde9 100644
  param=-config
  param=xrdp/xorg.conf
  param=-noreset
- param=-ac
  param=-nolisten
  param=tcp
 -param=-logfile
@@ -20,4 +19,5 @@ index 5e70225..79bfde9 100644
 +#param=/dev/null
 
  [Chansrv]
- # drive redirection, defaults to xrdp_client if not set
+ ; drive redirection, defaults to xrdp_client if not set
+
