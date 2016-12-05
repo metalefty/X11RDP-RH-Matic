@@ -58,6 +58,7 @@ XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --disable-static"
 # flags
 PARALLELMAKE=true   # increase make jobs
 INSTALL_XRDP=true   # install built package after build
+MAINTAINER=false    # maintainer mode
 IS_EL6=$([ "$(rpm --eval %{?rhel})" -le 6 ] && echo true || echo false)
 
 # substitutes
@@ -98,6 +99,13 @@ error_exit()
 	echo_stderr "	$SUDO_LOG"
 	echo_stderr "	$YUM_LOG"
 	echo_stderr "Exiting..."
+	if ${MAINTAINER}; then
+		echo_stderr
+		echo_stderr 'Maintainer mode detected, showing build log...'
+		echo_stderr
+		tail -n 100 ${BUILD_LOG} 1>&2
+		echo_stderr
+	fi
 	[ -f .PID ] && [ "$(cat .PID)" = $$ ] && rm -f .PID
 	exit 1
 }
@@ -332,6 +340,7 @@ OPTIONS
                        The master branch changes when xrdp authors merge changes from the devel branch.
   --nocpuoptimize    : do not change X11rdp build script to utilize more than 1 of your CPU cores.
   --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
+  --maintainer       : maintainer mode
   --noinstall        : do not install anything, just build the packages
   --nox11rdp         : do not build and install x11rdp
   --with-xorgxrdp    : build xorgxrdp (formerly known as xorg-driver)
@@ -364,6 +373,10 @@ OPTIONS
 				echo "Note : using the bleeding-edge version may result in problems :)"
 			fi
 			echo $LINE
+			;;
+
+		--maintainer)
+			MAINTAINER=true
 			;;
 
 		--noinstall)
