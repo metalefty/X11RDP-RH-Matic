@@ -33,6 +33,12 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin
 : ${GH_PROJECT:=xrdp}
 : ${GH_BRANCH:=master}
 GH_URL=https://github.com/${GH_ACCOUNT}/${GH_PROJECT}.git
+# xorgxrdp repository
+: ${GH_ACCOUNT_xorgxrdp:=neutrinolabs}
+: ${GH_PROJECT_xorgxrdp:=xorgxrdp}
+: ${GH_BRANCH_xorgxrdp:=master}
+GH_URL_xorgxrdp=https://github.com/${GH_ACCOUNT_xorgxrdp}/${GH_PROJECT_xorgxrdp}.git
+
 
 OLDWRKDIR=''
 WRKDIR=$(mktemp --directory --suffix .X11RDP-RH-Matic)
@@ -140,7 +146,7 @@ calculate_version_num()
 	echo -n 'Calculating RPM version number... '
 
 	XRDPVER=$(cd ${WRKDIR}/${WRKSRC}; grep xrdp readme.txt | head -1 | cut -d " " -f2)
-	XORGXRDPVER=${XRDPVER}.git$(cd ${WRKDIR}/${WRKSRC}/xorgxrdp; git rev-parse HEAD | head -c7)
+	XORGXRDPVER=${XRDPVER}.git$(cd ${WRKDIR}/${WRKSRC_xorgxrdp}; git rev-parse HEAD | head -c7)
 	XRDPVER=${XRDPVER}.git${GH_COMMIT}
 
 	echo xrdp=$XRDPVER xorgxrdp=$XORGXRDPVER
@@ -153,6 +159,7 @@ generate_spec()
 	echo -n 'Generating RPM spec files... '
 
 	GH_BRANCH_IN_PKGNAME=$(echo ${GH_BRANCH} |  sed -e 's|[^A-Za-z0-9._\+]|_|g')
+	GH_BRANCH_IN_PKGNAME_xorgxrdp=$(echo ${GH_BRANCH_xorgxrdp} |  sed -e 's|[^A-Za-z0-9._\+]|_|g')
 
 	# replace common variables in spec templates
 	for f in SPECS/*.spec.in
@@ -161,9 +168,13 @@ generate_spec()
 		-e "s/%%XRDPVER%%/${XRDPVER}/g" \
 		-e "s/%%XORGXRDPVER%%/${XORGXRDPVER}/g" \
 		-e "s/%%XRDPBRANCH%%/${GH_BRANCH_IN_PKGNAME}/g" \
+		-e "s/%%XORGXRDPBRANCH%%/${GH_BRANCH_IN_PKGNAME_xorgxrdp}/g" \
 		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
 		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
 		-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
+		-e "s/%%GH_ACCOUNT_xorgxrdp%%/${GH_ACCOUNT_xorgxrdp}/g" \
+		-e "s/%%GH_PROJECT_xorgxrdp%%/${GH_PROJECT_xorgxrdp}/g" \
+		-e "s/%%GH_COMMIT_xorgxrdp%%/${GH_COMMIT_xorgxrdp}/g" \
 		< $f > ${WRKDIR}/$(basename ${f%.in}) || error_exit
 	done
 
@@ -196,7 +207,7 @@ clone()
 	GH_COMMIT=$(git ls-remote --heads $GH_URL | grep ${GH_BRANCH}$ | head -c7)
 	WRKSRC=${GH_ACCOUNT}-${GH_PROJECT}-${GH_COMMIT}
 	DISTFILE=${WRKSRC}.tar.gz
-	echo -n 'Cloning source code... '
+	echo -n 'Cloning xrdp source code... '
 
 	if [ ! -f ${SOURCE_DIR}/${DISTFILE} ]; then
 		# always clone via https
@@ -207,6 +218,8 @@ clone()
 		if $IS_EL6; then
 			sed -i -e 's|autoreconf|autoreconf268|' ${WRKDIR}/${WRKSRC}/bootstrap
 		fi
+
+
 		tar cfz ${WRKDIR}/${DISTFILE} -C ${WRKDIR} ${WRKSRC} || error_exit
 		cp -a ${WRKDIR}/${DISTFILE} ${SOURCE_DIR}/${DISTFILE} || error_exit
 
@@ -217,6 +230,18 @@ clone()
 		tar zxf ${SOURCE_DIR}/${DISTFILE} -C ${WRKDIR} || error_exit
 		echo 'done'
 	fi
+
+	# xorgxrdp
+	GH_COMMIT_xorgxrdp=$(git ls-remote --heads $GH_URL_xorgxrdp | grep ${GH_BRANCH_xorgxrdp}$ | head -c7)
+	WRKSRC_xorgxrdp=${GH_ACCOUNT_xorgxrdp}-${GH_PROJECT_xorgxrdp}-${GH_COMMIT_xorgxrdp}
+	DISTFILE_xorgxrdp=${WRKSRC_xorgxrdp}.tar.gz
+	echo -n 'Cloning xorgxrdp source code... '
+	git clone ${GH_URL_xorgxrdp} --branch ${GH_BRANCH_xorgxrdp} ${WRKDIR}/${WRKSRC_xorgxrdp} >> $BUILD_LOG 2>&1 || error_exit
+	tar cfz ${WRKDIR}/${DISTFILE_xorgxrdp} -C ${WRKDIR} ${WRKSRC_xorgxrdp} || error_exit
+	cp -a ${WRKDIR}/${DISTFILE_xorgxrdp} ${SOURCE_DIR}/${DISTFILE_xorgxrdp} || error_exit
+
+  echo 'done'
+	
 }
 
 x11rdp_dirty_build()
@@ -328,6 +353,7 @@ OPTIONS
 			get_branches
 			if [ $(expr "$BRANCHES" : ".*${2}.*") -ne 0 ]; then
 				GH_BRANCH=$2
+				GH_BRANCH_xorgxrdp=$2
 			else
 				echo "**** Error detected in branch selection. Argument after --branch was : $2 ."
 				echo "**** Available branches : "$BRANCHES
