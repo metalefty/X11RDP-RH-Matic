@@ -245,6 +245,9 @@ clone()
 	DISTFILE_xorgxrdp=${WRKSRC_xorgxrdp}.tar.gz
 	echo -n 'Cloning xorgxrdp source code... '
 	git clone ${GH_URL_xorgxrdp} --branch ${GH_BRANCH_xorgxrdp} ${WRKDIR}/${WRKSRC_xorgxrdp} >> $BUILD_LOG 2>&1 || error_exit
+	if $IS_EL6; then
+		sed -i -e 's|autoreconf|autoreconf268|' ${WRKDIR}/${WRKSRC_xorgxrdp}/bootstrap
+	fi
 	tar cfz ${WRKDIR}/${DISTFILE_xorgxrdp} -C ${WRKDIR} ${WRKSRC_xorgxrdp} || error_exit
 	cp -a ${WRKDIR}/${DISTFILE_xorgxrdp} ${SOURCE_DIR}/${DISTFILE_xorgxrdp} || error_exit
 
