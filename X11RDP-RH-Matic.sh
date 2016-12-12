@@ -68,7 +68,7 @@ XORGXRDPDEBUG_SUB="# "
 XRDP_BASIC_BUILD_DEPENDS=$(<SPECS/xrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
 XRDP_ADDITIONAL_BUILD_DEPENDS="libjpeg-turbo-devel fuse-devel"
 # xorg driver build dependencies
-XORGXRDP_BUILD_DEPENDS=$(<SPECS/xorg-x11-drv-xrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
+XORGXRDP_BUILD_DEPENDS=$(<SPECS/xorgxrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
 # x11rdp
 X11RDP_BUILD_DEPENDS=$(<SPECS/x11rdp.spec.in grep BuildRequires: | awk '{ print $2 }' | tr '\n' ' ')
 
@@ -190,7 +190,7 @@ generate_spec()
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XORGXRDP_BUILD_DEPENDS}/g" \
 	-e "s/%%XORGXRDPDEBUG%%/${XORGXRDPDEBUG_SUB}/g" \
-	${WRKDIR}/xorg-x11-drv-xrdp.spec || error_exit
+	${WRKDIR}/xorgxrdp.spec || error_exit
 
 	sed -i.bak \
 	-e "s/%%BUILDREQUIRES%%/${XRDP_ADDITIONAL_BUILD_DEPENDS}/g" \
@@ -406,11 +406,11 @@ OPTIONS
 
 		--with-xorg-driver) # alias for --with-xorgxrdp
 			echo_stderr 'WARNING: --with-xorg-driver was renamed to --with-xorgxrdp'
-			TARGETS="$TARGETS xorg-x11-drv-xrdp"
+			TARGETS="$TARGETS xorgxrdp"
 			;;
 
 		--with-xorgxrdp)
-			TARGETS="$TARGETS xorg-x11-drv-xrdp"
+			TARGETS="$TARGETS xorgxrdp"
 			;;
 
 		--xorgxrdpdebug)
@@ -483,7 +483,7 @@ install_built_xrdp()
 	for t in $TARGETS ; do
 		echo -n "Installing built $t... "
 		case "$t" in
-			xorg-x11-drv-xrdp)
+			xorgxrdp)
 				RPM_VERSION_SUFFIX=$(rpm --eval -${XORGXRDPVER}+${GH_BRANCH_IN_PKGNAME}-1%{?dist}.%{_arch}.rpm) ;;
 			*)
 				RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH_IN_PKGNAME}-1%{?dist}.%{_arch}.rpm) ;;
@@ -500,7 +500,7 @@ install_targets_depends()
 		case "$t" in
 			xrdp) install_depends $XRDP_BASIC_BUILD_DEPENDS $XRDP_ADDITIONAL_BUILD_DEPENDS;;
 			x11rdp) install_depends $X11RDP_BUILD_DEPENDS ;;
-			xorg-x11-drv-xrdp) install_depends $XORGXRDP_BUILD_DEPENDS;;
+			xorgxrdp) install_depends $XORGXRDP_BUILD_DEPENDS;;
 		esac
 	done
 }
