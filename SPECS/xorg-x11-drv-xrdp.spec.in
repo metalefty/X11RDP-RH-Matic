@@ -1,5 +1,5 @@
 %define	xorgxrdpver	%%XORGXRDPVER%%
-%define	xrdpbranch	%%XRDPBRANCH%%
+%define	xorgxrdpbranch	%%XORGXRDPBRANCH%%
 %define moduledir	%(pkg-config xorg-server --variable=moduledir)
 %define driverdir	%{moduledir}/drivers
 %define inputdir	%{moduledir}/input
@@ -7,11 +7,12 @@
 
 Summary:	Xorg X11 rdp driver for xrdp
 Name:		xorg-x11-drv-xrdp
-Version:	%{xorgxrdpver}+%{xrdpbranch}
+Version:	%{xorgxrdpver}+%{xorgxrdpbranch}
 License:	MIT
 Release:	1%{?dist}
 URL:		http://www.xrdp.org/
-Source0:	%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
+Source0:	%%GH_ACCOUNT_xorgxrdp%%-%%GH_PROJECT_xorgxrdp%%-%%GH_COMMIT_xorgxrdp%%.tar.gz
+Source1:	%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
 
 # Dependencies don't vary depending on build options
 Requires:	xorg-x11-server-Xorg
@@ -31,12 +32,13 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 Xorg X11 rdp driver for xrdp
 
 %prep
-%setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/xorgxrdp
+%setup -b 1 -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%
+%setup -n %%GH_ACCOUNT_xorgxrdp%%-%%GH_PROJECT_xorgxrdp%%-%%GH_COMMIT_xorgxrdp%%
 %%XORGXRDPDEBUG%%find . -type f | xargs sed -i.bak -e 's|#define LOG_LEVEL [0-9]*|#define LOG_LEVEL 20|'
 
 %build
 ./bootstrap
-./configure
+./configure XRDP_CFLAGS=-I%{_builddir}/%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/common
 %{__make}
 
 %install
