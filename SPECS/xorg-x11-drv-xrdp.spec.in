@@ -38,7 +38,7 @@ Xorg X11 rdp driver for xrdp
 
 %build
 ./bootstrap
-env XRDP_CFLAGS=-I../%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/common ./configure
+./configure XRDP_CFLAGS=-I%{_builddir}/%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%/common
 %{__make}
 
 %install
