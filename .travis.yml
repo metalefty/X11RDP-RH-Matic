@@ -3,9 +3,10 @@ language: c
 
 env:
   matrix:
-    - OS_TYPE=centos OS_VERSION=6 BRANCH=master
+    # building master branch is not supported now
+    #- OS_TYPE=centos OS_VERSION=6 BRANCH=master
+    #- OS_TYPE=centos OS_VERSION=7 BRANCH=master
     - OS_TYPE=centos OS_VERSION=6 BRANCH=devel
-    - OS_TYPE=centos OS_VERSION=7 BRANCH=master
     - OS_TYPE=centos OS_VERSION=7 BRANCH=devel
     - OS_TYPE=centos OS_VERSION=7 BRANCH=devel  GH_ACCOUNT=metalefty
 
