@@ -154,8 +154,9 @@ calculate_version_num()
 	echo -n 'Calculating RPM version number... '
 
 	XRDPVER=$(cd ${WRKDIR}/${WRKSRC}; grep xrdp readme.txt | head -1 | cut -d " " -f2)
-	XORGXRDPVER=${XRDPVER}.git$(cd ${WRKDIR}/${WRKSRC_xorgxrdp}; git rev-parse HEAD | head -c7)
+	XORGXRDPVER=$(cd ${WRKDIR}/${WRKSRC_xorgxrdp}; grep "Current Version" README.md | head -1 | cut -d " " -f3)
 	XRDPVER=${XRDPVER}.git${GH_COMMIT}
+	XORGXRDPVER=${XORGXRDPVER}.git$(cd ${WRKDIR}/${WRKSRC_xorgxrdp}; git rev-parse HEAD | head -c7)
 
 	echo xrdp=$XRDPVER xorgxrdp=$XORGXRDPVER
 }
