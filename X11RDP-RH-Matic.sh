@@ -244,15 +244,24 @@ clone()
 	WRKSRC_xorgxrdp=${GH_ACCOUNT_xorgxrdp}-${GH_PROJECT_xorgxrdp}-${GH_COMMIT_xorgxrdp}
 	DISTFILE_xorgxrdp=${WRKSRC_xorgxrdp}.tar.gz
 	echo -n 'Cloning xorgxrdp source code... '
-	git clone ${GH_URL_xorgxrdp} --branch ${GH_BRANCH_xorgxrdp} ${WRKDIR}/${WRKSRC_xorgxrdp} >> $BUILD_LOG 2>&1 || error_exit
-	if $IS_EL6; then
-		sed -i -e 's|autoreconf|autoreconf268|' ${WRKDIR}/${WRKSRC_xorgxrdp}/bootstrap
-	fi
-	tar cfz ${WRKDIR}/${DISTFILE_xorgxrdp} -C ${WRKDIR} ${WRKSRC_xorgxrdp} || error_exit
-	cp -a ${WRKDIR}/${DISTFILE_xorgxrdp} ${SOURCE_DIR}/${DISTFILE_xorgxrdp} || error_exit
 
-  echo 'done'
-	
+  if [ ! -f ${SOURCE_DIR}/${DISTFILE_xorgxrdp} ]; then
+		git clone ${GH_URL_xorgxrdp} --branch ${GH_BRANCH_xorgxrdp} ${WRKDIR}/${WRKSRC_xorgxrdp} >> $BUILD_LOG 2>&1 || error_exit
+
+		if $IS_EL6; then
+			sed -i -e 's|autoreconf|autoreconf268|' ${WRKDIR}/${WRKSRC_xorgxrdp}/bootstrap
+		fi
+
+		tar cfz ${WRKDIR}/${DISTFILE_xorgxrdp} -C ${WRKDIR} ${WRKSRC_xorgxrdp} || error_exit
+		cp -a ${WRKDIR}/${DISTFILE_xorgxrdp} ${SOURCE_DIR}/${DISTFILE_xorgxrdp} || error_exit
+
+		echo 'done'
+	else
+		echo 'already exists'
+		echo -n 'Unpacking previously cloned source code... '
+		tar zxf ${SOURCE_DIR}/${DISTFILE_xorgxrdp} -C ${WRKDIR} || error_exit
+		echo 'done'
+	fi
 }
 
 x11rdp_dirty_build()
