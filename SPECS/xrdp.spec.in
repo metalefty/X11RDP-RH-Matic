@@ -19,8 +19,7 @@ Source2:	xrdp.sysconfig
 Source3:	xrdp.logrotate
 
 Patch0:		sesman.ini.master.patch
-Patch1:		sesman.ini.devel.patch
-Patch2:		xrdp-pam-auth.patch
+Patch1:		xrdp-pam-auth.patch
 
 # Basic dependensies
 BuildRequires:	autoconf
@@ -60,14 +59,14 @@ RDP server for Linux
 %setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%
 if grep -q param= sesman/sesman.ini
 then
-%patch1
+:
 else
 %patch0
 fi
 # neutrinolabs/xrdp devel branch after 3934be9 does not require this patch.
 if [ -e instfiles/pam.d/xrdp-sesman ]
 then
-%patch2
+%patch1
 fi
 
 %build
