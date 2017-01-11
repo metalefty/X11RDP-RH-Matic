@@ -52,7 +52,7 @@ SOURCE_DIR=$(rpm --eval %{_sourcedir})
 TARGETS="xrdp x11rdp"
 META_DEPENDS="rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
-EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate xrdp-pam-auth.patch buildx_patch.diff x11_file_list.patch sesman.ini.master.patch"
+EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate"
 XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --disable-static"
 
 # flags
@@ -286,8 +286,6 @@ x11rdp_dirty_build()
 	# build x11rdp once into $X11RDPBASE
 	(
 	cd ${WRKDIR}/${WRKSRC}/xorg/X11R7.6 && \
-	patch --forward -p2 < ${SOURCE_DIR}/buildx_patch.diff >> $BUILD_LOG 2>&1 ||: && \
-	patch --forward -p2 < ${SOURCE_DIR}/x11_file_list.patch >> $BUILD_LOG 2>&1 ||: && \
 	sed -i.bak \
 		-e 's/if ! mkdir $PREFIX_DIR/if ! mkdir -p $PREFIX_DIR/' \
 		-e 's/wget -cq/wget -cq --retry-connrefused --waitretry=10/' \
