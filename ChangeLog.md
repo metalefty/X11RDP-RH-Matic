@@ -1,3 +1,17 @@
+2.0.5
+-----
+- Always use https to fetch source
+- Add maintainer mode
+- Fix the xrdp build on EL6
+- Fix the x11rdp build (#39, #40)
+- Rename xorg-x11-drv-xrdp to xorgxrdp
+ - if you already have installed xorg-x11-drv-xrdp, uninstall before run RH-Matic
+- Lots of cleanups, improbe build robustness
+
+Thanks to
+- Elio Coutinho
+- Hiroki Takada
+
 2.0.4
 -----
 - Fix the build failure not fixed in 2.0.3
