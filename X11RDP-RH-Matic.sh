@@ -225,6 +225,10 @@ clone()
 		(cd ${WRKDIR}/${WRKSRC} && git submodule update --init --recursive)  >> $BUILD_LOG 2>&1
 
 		if $IS_EL6; then
+			sed -i \
+				-e 's/librfxencode.a$/librfxencode.la/g' \
+				-e 's/libpainter.a$/libpainter.la/g' \
+				${WRKDIR}/${WRKSRC}/xrdp/Makefile.am
 			sed -i -e 's|autoreconf|autoreconf268|' ${WRKDIR}/${WRKSRC}/bootstrap
 		fi
 
