@@ -1,8 +1,8 @@
 #!/bin/bash
 #set -u # error unbound variables
 # vim:ts=2:sw=2:sts=0:number
-VERSION=2.0.1
-RELEASEDATE=20160916
+VERSION=2.0.5
+RELEASEDATE=20170314
 
 trap user_interrupt_exit 2
 
@@ -225,6 +225,10 @@ clone()
 		(cd ${WRKDIR}/${WRKSRC} && git submodule update --init --recursive)  >> $BUILD_LOG 2>&1
 
 		if $IS_EL6; then
+			sed -i \
+				-e 's/librfxencode.a$/librfxencode.la/g' \
+				-e 's/libpainter.a$/libpainter.la/g' \
+				${WRKDIR}/${WRKSRC}/xrdp/Makefile.am
 			sed -i -e 's|autoreconf|autoreconf268|' ${WRKDIR}/${WRKSRC}/bootstrap
 		fi
 

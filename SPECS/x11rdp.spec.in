@@ -12,8 +12,6 @@ Release:	1%{?dist}
 URL:		http://www.xrdp.org/
 Source0:	%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
 
-Patch0:		buildx_patch.diff
-
 AutoReq:	no
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -35,7 +33,7 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 X11rdp backend for xrdp remote access server
 
 %build
-%{__rm} -rf %{_builddir}
+%{__rm} -rf %{_builddir}%%X11RDPBASE%%
 %{__mkdir} -p %{_builddir}%%X11RDPBASE%%
 %{__cp} -rp %%X11RDPBASE%%/* %{_builddir}%%X11RDPBASE%%
 find %{_builddir} ! -perm -u+w -exec %{__chmod} u+w {} \;
