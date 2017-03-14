@@ -7,6 +7,8 @@ X11RDP-RH-Matic helps to build and install latest snapshot of [xrdp](https://git
 
 This utility is inspired by [X11RDP-o-Matic](https://github.com/scarygliders/X11RDP-o-Matic). In other words, Red Hat version of X11RDP-o-Matic.
 
+Please note this utility is oriented to xrdp developers or xrdp early testers.
+
 What this is not?
 ----
 - xrdp itself
