@@ -23,6 +23,12 @@ $ cd X11RDP-RH-Matic
 $ ./X11RDP-RH-Matic.sh
 ```
 
+Adding these options is recommended now.
+
+```
+$ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
+```
+
 Use develop branch to try development snapshot.
 
 X11RDP-RH-Matic uses official neutrinolabs repository by default.
