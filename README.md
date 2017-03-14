@@ -69,10 +69,6 @@ add `--nox11rdp` option.
 $ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
 ```
 
-Now RH-Matic installs non-suid version of Xorg to `/usr/bin/Xorg.xrdp`.
-You don't need to edit `/etc/pam.d/xserver` introduced in
-[CentOS forum](https://www.centos.org/forums/viewtopic.php?t=21185).
-
 Contributing
 ----
 

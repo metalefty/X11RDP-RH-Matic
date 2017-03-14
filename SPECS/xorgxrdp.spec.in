@@ -48,18 +48,6 @@ Xorg X11 rdp driver for xrdp
 find %{buildroot} -name \*.la -delete
 find %{buildroot} -name \*.a -delete
 
-%post
-if [ "$1" = "1" ]
-then
-%{__install} -p -m 0755 %{_bindir}/Xorg %{_bindir}/Xorg.xrdp
-fi
-
-%postun
-if [ "$1" = "0" ]
-then
-%{__rm} -f %{_bindir}/Xorg.xrdp
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
