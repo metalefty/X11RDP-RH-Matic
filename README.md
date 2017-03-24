@@ -7,6 +7,8 @@ X11RDP-RH-Matic helps to build and install latest snapshot of [xrdp](https://git
 
 This utility is inspired by [X11RDP-o-Matic](https://github.com/scarygliders/X11RDP-o-Matic). In other words, Red Hat version of X11RDP-o-Matic.
 
+Please note this utility is oriented to xrdp developers or xrdp early testers.
+
 What this is not?
 ----
 - xrdp itself
@@ -21,6 +23,12 @@ Usage
 $ git clone https://github.com/metalefty/X11RDP-RH-Matic.git
 $ cd X11RDP-RH-Matic
 $ ./X11RDP-RH-Matic.sh
+```
+
+Adding these options is recommended now.
+
+```
+$ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
 ```
 
 Use develop branch to try development snapshot.
@@ -68,10 +76,6 @@ add `--nox11rdp` option.
 ```
 $ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
 ```
-
-Now RH-Matic installs non-suid version of Xorg to `/usr/bin/Xorg.xrdp`.
-You don't need to edit `/etc/pam.d/xserver` introduced in
-[CentOS forum](https://www.centos.org/forums/viewtopic.php?t=21185).
 
 Contributing
 ----
