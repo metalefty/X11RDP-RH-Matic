@@ -155,6 +155,8 @@ calculate_version_num()
 
 	XRDPVER=$(cd ${WRKDIR}/${WRKSRC}; grep xrdp readme.txt | head -1 | cut -d " " -f2)
 	XORGXRDPVER=$(cd ${WRKDIR}/${WRKSRC_xorgxrdp}; grep "Current Version" README.md | head -1 | cut -d " " -f3)
+	echo ${XRDPVER} | grep -q '[0-9].[0-9].[0-9]' || error_exit
+	echo ${XORGXRDPVER} | grep -q '[0-9].[0-9].[0-9]' || error_exit
 	XRDPVER=${XRDPVER}.git${GH_COMMIT}
 	XORGXRDPVER=${XORGXRDPVER}.git$(cd ${WRKDIR}/${WRKSRC_xorgxrdp}; git rev-parse HEAD | head -c7)
 
