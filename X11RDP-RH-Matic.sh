@@ -231,7 +231,10 @@ clone()
 				-e 's/librfxencode.a$/librfxencode.la/g' \
 				-e 's/libpainter.a$/libpainter.la/g' \
 				${WRKDIR}/${WRKSRC}/xrdp/Makefile.am
-			sed -i -e 's|autoreconf|autoreconf268|' ${WRKDIR}/${WRKSRC}/bootstrap
+			sed -i -e 's|autoreconf|autoreconf268|' \
+				${WRKDIR}/${WRKSRC}/bootstrap \
+				${WRKDIR}/${WRKSRC}/librfxcodec/bootstrap \
+				${WRKDIR}/${WRKSRC}/libpainter/bootstrap
 		fi
 
 
