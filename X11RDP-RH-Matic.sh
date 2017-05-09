@@ -176,27 +176,27 @@ generate_spec()
 	for f in SPECS/*.spec.in
 	do
 		sed \
-		-e "s/%%XRDPVER%%/${XRDPVER}/g" \
-		-e "s/%%XORGXRDPVER%%/${XORGXRDPVER}/g" \
-		-e "s/%%XRDPBRANCH%%/${GH_BRANCH_IN_PKGNAME}/g" \
-		-e "s/%%XORGXRDPBRANCH%%/${GH_BRANCH_IN_PKGNAME_xorgxrdp}/g" \
-		-e "s/%%GH_ACCOUNT%%/${GH_ACCOUNT}/g" \
-		-e "s/%%GH_PROJECT%%/${GH_PROJECT}/g" \
-		-e "s/%%GH_COMMIT%%/${GH_COMMIT}/g" \
-		-e "s/%%GH_ACCOUNT_xorgxrdp%%/${GH_ACCOUNT_xorgxrdp}/g" \
-		-e "s/%%GH_PROJECT_xorgxrdp%%/${GH_PROJECT_xorgxrdp}/g" \
-		-e "s/%%GH_COMMIT_xorgxrdp%%/${GH_COMMIT_xorgxrdp}/g" \
+		-e "s|%%XRDPVER%%|${XRDPVER}|g" \
+		-e "s|%%XORGXRDPVER%%|${XORGXRDPVER}|g" \
+		-e "s|%%XRDPBRANCH%%|${GH_BRANCH_IN_PKGNAME}|g" \
+		-e "s|%%XORGXRDPBRANCH%%|${GH_BRANCH_IN_PKGNAME_xorgxrdp}|g" \
+		-e "s|%%GH_ACCOUNT%%|${GH_ACCOUNT}|g" \
+		-e "s|%%GH_PROJECT%%|${GH_PROJECT}|g" \
+		-e "s|%%GH_COMMIT%%|${GH_COMMIT}|g" \
+		-e "s|%%GH_ACCOUNT_xorgxrdp%%|${GH_ACCOUNT_xorgxrdp}|g" \
+		-e "s|%%GH_PROJECT_xorgxrdp%%|${GH_PROJECT_xorgxrdp}|g" \
+		-e "s|%%GH_COMMIT_xorgxrdp%%|${GH_COMMIT_xorgxrdp}|g" \
 		< $f > ${WRKDIR}/$(basename ${f%.in}) || error_exit
 	done
 
 	sed -i.bak \
-	-e "s/%%BUILDREQUIRES%%/${XORGXRDP_BUILD_DEPENDS}/g" \
-	-e "s/%%XORGXRDPDEBUG%%/${XORGXRDPDEBUG_SUB}/g" \
+	-e "s|%%BUILDREQUIRES%%|${XORGXRDP_BUILD_DEPENDS}|g" \
+	-e "s|%%XORGXRDPDEBUG%%|${XORGXRDPDEBUG_SUB}|g" \
 	${WRKDIR}/xorgxrdp.spec || error_exit
 
 	sed -i.bak \
-	-e "s/%%BUILDREQUIRES%%/${XRDP_ADDITIONAL_BUILD_DEPENDS}/g" \
-	-e "s/%%CONFIGURE_ARGS%%/${XRDP_CONFIGURE_ARGS}/g" \
+	-e "s|%%BUILDREQUIRES%%|${XRDP_ADDITIONAL_BUILD_DEPENDS}|g" \
+	-e "s|%%CONFIGURE_ARGS%%|${XRDP_CONFIGURE_ARGS}|g" \
 	${WRKDIR}/xrdp.spec || error_exit
 
 	sed -i.bak \
@@ -228,8 +228,8 @@ clone()
 
 		if $IS_EL6; then
 			sed -i \
-				-e 's/librfxencode.a$/librfxencode.la/g' \
-				-e 's/libpainter.a$/libpainter.la/g' \
+				-e 's|librfxencode.a$|librfxencode.la|g' \
+				-e 's|libpainter.a$|libpainter.la|g' \
 				${WRKDIR}/${WRKSRC}/xrdp/Makefile.am
 			sed -i -e 's|autoreconf|autoreconf268|' \
 				${WRKDIR}/${WRKSRC}/bootstrap \
@@ -296,9 +296,9 @@ x11rdp_dirty_build()
 	(
 	cd ${WRKDIR}/${WRKSRC}/xorg/X11R7.6 && \
 	sed -i.bak \
-		-e 's/if ! mkdir $PREFIX_DIR/if ! mkdir -p $PREFIX_DIR/' \
-		-e 's/wget -cq/wget -cq --retry-connrefused --waitretry=10/' \
-		-e "s/make -j 1/make -j $jobs/g" \
+		-e 's|if ! mkdir $PREFIX_DIR|if ! mkdir -p $PREFIX_DIR|' \
+		-e 's|wget -cq|wget -cq --retry-connrefused --waitretry=10|' \
+		-e "s|make -j 1|make -j $jobs|g" \
 		-e 's|^download_url=http://server1.xrdp.org/xrdp/X11R7.6|download_url=https://xrdp.vmeta.jp/pub/xrdp/X11R7.6|' \
 		buildx.sh >> $BUILD_LOG 2>&1 && \
 	SUDO_CMD ./buildx.sh $X11RDPBASE >> $BUILD_LOG 2>&1
