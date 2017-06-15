@@ -74,7 +74,7 @@ option. When you want to build xorgxrdp, probably you don't need X11rdp then als
 add `--nox11rdp` option.
 
 ```
-$ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
+$ ./X11RDP-RH-Matic.sh --with-xorgxrdp --nox11rdp
 ```
 
 Contributing
