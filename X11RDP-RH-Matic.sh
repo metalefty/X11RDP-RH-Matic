@@ -53,7 +53,7 @@ TARGETS="xrdp x11rdp"
 META_DEPENDS="rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate"
-XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --disable-static"
+XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --enable-ipv6 --disable-static"
 
 # flags
 PARALLELMAKE=true   # increase make jobs
