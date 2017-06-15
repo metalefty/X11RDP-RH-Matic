@@ -1,8 +1,8 @@
 #!/bin/bash
 #set -u # error unbound variables
 # vim:ts=2:sw=2:sts=0:number
-VERSION=2.0.5
-RELEASEDATE=20170314
+VERSION=2.0.6
+RELEASEDATE=20170615
 
 trap user_interrupt_exit 2
 
@@ -53,7 +53,7 @@ TARGETS="xrdp x11rdp"
 META_DEPENDS="rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate"
-XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --disable-static"
+XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --enable-ipv6 --disable-static"
 
 # flags
 PARALLELMAKE=true   # increase make jobs
@@ -491,7 +491,7 @@ install_built_xrdp()
 		echo -n "Installing built $t... "
 		case "$t" in
 			xorgxrdp)
-				RPM_VERSION_SUFFIX=$(rpm --eval -${XORGXRDPVER}+${GH_BRANCH_IN_PKGNAME}-1%{?dist}.%{_arch}.rpm) ;;
+				RPM_VERSION_SUFFIX=$(rpm --eval -${XORGXRDPVER}+${GH_BRANCH_IN_PKGNAME_xorgxrdp}-1%{?dist}.%{_arch}.rpm) ;;
 			*)
 				RPM_VERSION_SUFFIX=$(rpm --eval -${XRDPVER}+${GH_BRANCH_IN_PKGNAME}-1%{?dist}.%{_arch}.rpm) ;;
 		esac
