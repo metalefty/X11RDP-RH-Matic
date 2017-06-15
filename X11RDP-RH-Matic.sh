@@ -1,8 +1,8 @@
 #!/bin/bash
 #set -u # error unbound variables
 # vim:ts=2:sw=2:sts=0:number
-VERSION=2.0.5
-RELEASEDATE=20170314
+VERSION=2.0.6
+RELEASEDATE=20170615
 
 trap user_interrupt_exit 2
 

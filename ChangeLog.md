@@ -1,3 +1,12 @@
+2.0.6
+-----
+- Add script to run test in docker (for developers)
+- Enable IPv6
+- Fix libpainter/librfxcodec build on EL6
+- Fix some branch/version calculation
+- Obtain version from configure.ac not readme.txt
+- Quit creating non-suid Xorg.xrdp as it no longer needed
+
 2.0.5
 -----
 - Always use https to fetch source
