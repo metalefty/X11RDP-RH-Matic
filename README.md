@@ -53,13 +53,14 @@ Please report if you confirmed it works.
 - CentOS release 6.5 (Final)
 - CentOS release 6.6 (Final) reported by Michael Niehren
 - CentOS Linux release 7.2.1511 (Core)
+- CentOS Linux release 7.3.1611 (Core)
 - Scientific Linux release 6.5 (Carbon)
 - Asianux Server release 7 SP1 (Lotus)
 
 Support policy
 ---
 X11RDP-RH-Matic supports the latest major version and one previous version of RHEL and its clones.
-That is 7.x and 6.x as of June 13, 2016.
+That is 7.x and 6.x as of June 15, 2017.
 
 
 TODOs
