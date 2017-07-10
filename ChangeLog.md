@@ -1,3 +1,7 @@
+2.0.7
+----
+- Correct private key path during post-install certificate generation
+
 2.0.6
 -----
 - Add script to run test in docker (for developers)
