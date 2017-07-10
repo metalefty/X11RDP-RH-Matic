@@ -102,7 +102,7 @@ fi
 if [ ! -f %{_sysconfdir}/xrdp/cert.pem -a ! -f %{_sysconfdir}/xrdp/key.pem ]; then
     openssl req -x509 \
       -newkey rsa:2048 -nodes -sha256 \
-      -keyout %{_sysconfdir}/cert/key.pem \
+      -keyout %{_sysconfdir}/xrdp/key.pem \
       -out %{_sysconfdir}/xrdp/cert.pem \
       -days 365 -subj /CN=$(hostname)
 fi
