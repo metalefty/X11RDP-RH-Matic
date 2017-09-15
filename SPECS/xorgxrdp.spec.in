@@ -25,6 +25,8 @@ BuildRequires:	pam-devel
 BuildRequires:	pkgconfig
 BuildRequires:	xorg-x11-server-devel
 BuildRequires:	nasm
+# this should be libXfont2-devel or libXfont-devel
+BuildRequires:	%%LIBXFONT_DEVEL%%
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
