@@ -218,7 +218,6 @@ generate_spec()
 		${WRKDIR}/xrdp.spec || error_exit
 	fi
 
-
 	echo 'done'
 }
 
