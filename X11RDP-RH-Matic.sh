@@ -60,6 +60,7 @@ PARALLELMAKE=true   # increase make jobs
 INSTALL_XRDP=true   # install built package after build
 MAINTAINER=false    # maintainer mode
 IS_EL6=$([ "$(rpm --eval %{?rhel})" -le 6 ] && echo true || echo false)
+IS_EL7=$([ "$(rpm --eval %{?rhel})" -eq 7 ] && echo true || echo false)
 
 # substitutes
 XORGXRDPDEBUG_SUB="# "
@@ -68,7 +69,13 @@ XORGXRDPDEBUG_SUB="# "
 XRDP_BASIC_BUILD_DEPENDS=$(<SPECS/xrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
 XRDP_ADDITIONAL_BUILD_DEPENDS="libjpeg-turbo-devel fuse-devel"
 # xorg driver build dependencies
+if $IS_EL7; then
+	LIBXFONT_DEVEL=libXfont2-devel
+else
+	LIBXFONT_DEVEL=libXfont-devel
+fi
 XORGXRDP_BUILD_DEPENDS=$(<SPECS/xorgxrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
+XORGXRDP_BUILD_DEPENDS="${XORGXRDP_BUILD_DEPENDS} ${LIBXFONT_DEVEL}"
 # x11rdp
 X11RDP_BUILD_DEPENDS=$(<SPECS/x11rdp.spec.in grep BuildRequires: | awk '{ print $2 }' | tr '\n' ' ')
 
@@ -192,6 +199,7 @@ generate_spec()
 	sed -i.bak \
 	-e "s|%%BUILDREQUIRES%%|${XORGXRDP_BUILD_DEPENDS}|g" \
 	-e "s|%%XORGXRDPDEBUG%%|${XORGXRDPDEBUG_SUB}|g" \
+	-e "s|%%LIBXFONT_DEVEL%%|${LIBXFONT_DEVEL}|" \
 	${WRKDIR}/xorgxrdp.spec || error_exit
 
 	sed -i.bak \
@@ -209,6 +217,7 @@ generate_spec()
 		-e 's|\(^BuildRequires:\s*\)\(autoconf\)|\1autoconf268|' \
 		${WRKDIR}/xrdp.spec || error_exit
 	fi
+
 
 	echo 'done'
 }
