@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 ARGS=$@
 
+yum swap -y fakesystemd systemd
 yum install -y sudo git
 sed -i.bak \
   -e 's/\(^%wheel\s*ALL=(ALL)\s*ALL\)/# \1/' \
