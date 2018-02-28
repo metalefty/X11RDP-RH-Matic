@@ -4,15 +4,11 @@ language: c
 env:
   matrix:
     - OS_TYPE=centos OS_VERSION=6 BRANCH=master
-    - OS_TYPE=centos OS_VERSION=7.0.1406 BRANCH=master
-    - OS_TYPE=centos OS_VERSION=7.1.1503 BRANCH=master
     - OS_TYPE=centos OS_VERSION=7.2.1511 BRANCH=master
     - OS_TYPE=centos OS_VERSION=7.3.1611 BRANCH=master
     - OS_TYPE=centos OS_VERSION=7.4.1708 BRANCH=master
     - OS_TYPE=centos OS_VERSION=7 BRANCH=master
     - OS_TYPE=centos OS_VERSION=6 BRANCH=devel
-    - OS_TYPE=centos OS_VERSION=7.0.1406 BRANCH=devel
-    - OS_TYPE=centos OS_VERSION=7.1.1503 BRANCH=devel
     - OS_TYPE=centos OS_VERSION=7.2.1511 BRANCH=devel
     - OS_TYPE=centos OS_VERSION=7.3.1611 BRANCH=devel
     - OS_TYPE=centos OS_VERSION=7.4.1708 BRANCH=devel
