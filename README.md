@@ -62,6 +62,8 @@ Support policy
 X11RDP-RH-Matic supports the latest major version and one previous version of RHEL and its clones.
 That is 7.x and 6.x as of June 15, 2017.
 
+CentOS 7.0 and 7.1 is not supported due to TLSv1.2 or higher being required by GitHub.
+
 
 TODOs
 ----
