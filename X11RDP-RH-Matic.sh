@@ -49,7 +49,7 @@ RPMS_DIR=$(rpm --eval %{_rpmdir}/%{_arch})
 SOURCE_DIR=$(rpm --eval %{_sourcedir})
 
 # variables for this utility
-TARGETS="xrdp x11rdp"
+TARGETS="xrdp"
 META_DEPENDS="rpm-build rpmdevtools"
 FETCH_DEPENDS="ca-certificates git wget"
 EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate"
@@ -370,7 +370,7 @@ OPTIONS
   --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
   --maintainer       : maintainer mode
   --noinstall        : do not install anything, just build the packages
-  --nox11rdp         : do not build and install x11rdp
+  --with-x11rdp      : build x11rdp (deprecated: replaced by xorgxrdp)
   --with-xorgxrdp    : build xorgxrdp (formerly known as xorg-driver)
   --with-xorg-driver : alias for --with-xorgxrdp
   --xorgxrdpdebug    : increase log level of xorgxrdp
@@ -416,7 +416,12 @@ OPTIONS
 			;;
 
 		--nox11rdp)
-			TARGETS=${TARGETS//x11rdp/}
+			echo_stderr 'WARNING: x11rdp is no longer built by default.'
+			;;
+
+		--with-x11rdp)
+			TARGETS="$TARGETS x11rdp"
+			echo_stderr 'WARNING: x11rdp is deprecated, consider useing xorgxrdp instead'
 			;;
 
 		--with-xorg-driver) # alias for --with-xorgxrdp
