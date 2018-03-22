@@ -367,7 +367,6 @@ OPTIONS
                        Branches beginning with \"v\" are stable releases.
                        The master branch changes when xrdp authors merge changes from the devel branch.
   --nocpuoptimize    : do not change X11rdp build script to utilize more than 1 of your CPU cores.
-  --cleanup          : remove X11rdp / xrdp source code after installation. (Default is to keep it).
   --maintainer       : maintainer mode
   --noinstall        : do not install anything, just build the packages
   --with-x11rdp      : build x11rdp (deprecated: replaced by xorgxrdp)
