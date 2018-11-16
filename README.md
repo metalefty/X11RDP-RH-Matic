@@ -3,7 +3,7 @@ X11RDP-RH-Matic  [![Build Status](https://travis-ci.org/metalefty/X11RDP-RH-Mati
 
 What is this?
 ----
-X11RDP-RH-Matic helps to build and install latest snapshot of [xrdp](https://github.com/neutrinolabs/xrdp), x11rdp, xorgxrdp (xorg-driver) for Red Hat Enterprise Linux or its clones.
+X11RDP-RH-Matic helps to build and install latest snapshot of [xrdp](https://github.com/neutrinolabs/xrdp), xorgxrdp (xorg-driver) for Red Hat Enterprise Linux or its clones.
 
 This utility is inspired by [X11RDP-o-Matic](https://github.com/scarygliders/X11RDP-o-Matic). In other words, Red Hat version of X11RDP-o-Matic.
 
@@ -28,7 +28,7 @@ $ ./X11RDP-RH-Matic.sh
 Adding these options is recommended now.
 
 ```
-$ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
+$ ./X11RDP-RH-Matic.sh --with-xorg-driver
 ```
 
 Use develop branch to try development snapshot.
@@ -62,6 +62,8 @@ Support policy
 X11RDP-RH-Matic supports the latest major version and one previous version of RHEL and its clones.
 That is 7.x and 6.x as of June 15, 2017.
 
+CentOS 7.0 and 7.1 is not supported due to TLSv1.2 or higher being required by GitHub.
+
 
 TODOs
 ----
@@ -71,11 +73,10 @@ TODOs
 Building xorgxrdp (formerly known as xorg-driver)
 ----
 X11RDP-RH-Matic can build xorgxrdp (aka xorg-driver). Run with `--with-xorg-driver`
-option. When you want to build xorgxrdp, probably you don't need X11rdp then also
-add `--nox11rdp` option.
+option. When you want to build xorgxrdp.
 
 ```
-$ ./X11RDP-RH-Matic.sh --with-xorgxrdp --nox11rdp
+$ ./X11RDP-RH-Matic.sh --with-xorgxrdp
 ```
 
 Contributing
