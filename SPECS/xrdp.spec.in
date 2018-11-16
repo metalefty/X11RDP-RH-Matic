@@ -17,6 +17,7 @@ Source0:	%%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%.tar.gz
 Source1:	xrdp.init
 Source2:	xrdp.sysconfig
 Source3:	xrdp.logrotate
+Source4:	xrdp.te
 
 # Basic dependensies
 BuildRequires:	autoconf
@@ -31,6 +32,10 @@ BuildRequires:	libXrandr-devel
 BuildRequires:	which
 BuildRequires:	make
 BuildRequires:	nasm
+# SELinux dependencies
+BuildRequires:	checkpolicy
+BuildRequires:	selinux-policy-devel
+BuildRequires:	hardlink
 # Additional dependencies which vary on depending on build options
 BuildRequires:	%%BUILDREQUIRES%%
 # Runtime dependencies
@@ -52,8 +57,23 @@ Requires(postun): initscripts
 %description
 RDP server for Linux
 
+%package selinux
+Summary: SELinux policy module required tu run xrdp
+
+Requires: %{name} = %{epoch}:%{version}-%{release}
+Requires: selinux-policy >= %{_selinux_policy_version}
+Requires(post): /usr/sbin/semodule
+Requires(postun): /usr/sbin/semodule
+
+%description selinux
+This package contains SELinux policy module necessary to run xrdp.
+
 %prep
 %setup -q -n %%GH_ACCOUNT%%-%%GH_PROJECT%%-%%GH_COMMIT%%
+
+# SELinux policy module
+%{__mkdir} SELinux
+%{__cp} -p %{SOURCE4} SELinux
 
 %build
 if [ -d libpainter ]; then
@@ -69,6 +89,16 @@ fi
 	%%CONFIGURE_ARGS%%
 
 %{__make}
+
+# SELinux policy module
+cd SELinux
+for selinuxvariant in %{selinux_variants}
+do
+	%{__make} NAME=${selinuxvariant} -f /usr/share/selinux/devel/Makefile
+	%{__mv} %{name}.pp %{name}.pp.${selinuxvariant}
+	%{__make} NAME=${selinuxvariant} -f /usr/share/selinux/devel/Makefile clean
+done
+cd -
 
 %install
 %{__make} install DESTDIR=%{buildroot}
@@ -93,6 +123,15 @@ fi
 %{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/cert.pem
 %{__rm} -f %{buildroot}%{_sysconfdir}/xrdp/key.pem
 
+# SELinux policy module
+for selinuxvariant in %{selinux_variants}
+do
+	%{__install} -d %{buildroot}%{_datadir}/selinux/${selinuxvariant}
+	%{__install} -p -m 644 SELinux/%{name}.pp.${selinuxvariant} \
+		%{buildroot}%{_datadir}/selinux/${selinuxvariant}/%{name}.pp
+done
+/usr/sbin/hardlink -cv %{buildroot}%{_datadir}/selinux
+
 %post
 # generate RSA key pair
 if [ ! -s %{_sysconfdir}/xrdp/rsakeys.ini ]; then
@@ -114,9 +153,6 @@ if [ "$1" -eq "1" ]; then
     /sbin/chkconfig --add %{name}
 fi
 %endif
-# workaround for Red Hat Bug 1177202
-# https://bugzilla.redhat.com/show_bug.cgi?id=1177202
-/usr/bin/chcon -t bin_t %{_sbindir}/xrdp %{_sbindir}/xrdp-sesman
 
 %preun
 %if 0%{?with_systemd}
@@ -138,6 +174,21 @@ fi
 
 %clean
 rm -rf %{buildroot}
+
+%post selinux
+for selinuxvariant in %{selinux_variants}
+do
+	/usr/sbin/semodule -s ${selinuxvariant} -i \
+		%{_datadir}/selinux/${selinuxvariant}/%{name}.pp &> /dev/null || :
+done
+
+%postun selinux
+if [ $1 -eq 0 ] ; then
+	for selinuxvariant in %{selinux_variants}
+	do
+		/usr/sbin/semodule -s ${selinuxvariant} -r %{name} &> /dev/null || :
+	done
+fi
 
 %files
 %defattr(-,root,root)
@@ -171,3 +222,7 @@ rm -rf %{buildroot}
 %else
 %{_initrddir}/*
 %endif
+
+%files selinux
+%doc SELinux/%{name}.te
+%{_datadir}/selinux/*/%{name}.pp

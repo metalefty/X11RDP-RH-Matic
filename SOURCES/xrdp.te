@@ -1,0 +1,24 @@
+module xrdp 1.0.1;
+
+require {
+        type unconfined_service_t;
+        type unconfined_t;
+        type xserver_exec_t;
+        type xserver_t;
+        type oddjob_t;
+        type oddjob_mkhomedir_exec_t;
+        class process transition;
+        class file entrypoint;
+        class process2 nnp_transition;
+}
+
+#============= unconfined_service_t ==============
+allow unconfined_service_t unconfined_t:process transition;
+allow unconfined_service_t oddjob_mkhomedir_exec_t:file entrypoint;
+
+#============= unconfined_t ==============
+allow unconfined_t xserver_exec_t:file entrypoint;
+allow unconfined_t xserver_t:process2 nnp_transition;
+
+#============= oddjob_t ==============
+allow oddjob_t unconfined_service_t:process transition;
