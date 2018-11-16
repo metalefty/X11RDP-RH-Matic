@@ -56,7 +56,6 @@ EXTRA_SOURCE="xrdp.init xrdp.sysconfig xrdp.logrotate"
 XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --enable-ipv6 --disable-static"
 
 # flags
-PARALLELMAKE=true   # increase make jobs
 INSTALL_XRDP=true   # install built package after build
 MAINTAINER=false    # maintainer mode
 IS_EL6=$([ "$(rpm --eval %{?rhel})" -le 6 ] && echo true || echo false)
@@ -76,8 +75,6 @@ else
 fi
 XORGXRDP_BUILD_DEPENDS=$(<SPECS/xorgxrdp.spec.in grep BuildRequires: | grep -v %% | awk '{ print $2 }' | tr '\n' ' ')
 XORGXRDP_BUILD_DEPENDS="${XORGXRDP_BUILD_DEPENDS} ${LIBXFONT_DEVEL}"
-# x11rdp
-X11RDP_BUILD_DEPENDS=$(<SPECS/x11rdp.spec.in grep BuildRequires: | awk '{ print $2 }' | tr '\n' ' ')
 
 SUDO_CMD()
 {
@@ -207,11 +204,6 @@ generate_spec()
 	-e "s|%%CONFIGURE_ARGS%%|${XRDP_CONFIGURE_ARGS}|g" \
 	${WRKDIR}/xrdp.spec || error_exit
 
-	sed -i.bak \
-	-e "s|%%X11RDPBASE%%|/opt/X11rdp|g" \
-	-e "s|make -j1|${makeCommand}|g" \
-	${WRKDIR}/x11rdp.spec || error_exit
-
 	if $IS_EL6; then
 		sed -i.bak \
 		-e 's|\(^BuildRequires:\s*\)\(autoconf\)|\1autoconf268|' \
@@ -282,44 +274,6 @@ clone()
 	fi
 }
 
-x11rdp_dirty_build()
-{
-	X11RDPBASE=/opt/X11rdp
-
-	# remove installed x11rdp before build x11rdp
-	check_if_installed x11rdp
-	if [ $? -eq 0 ]; then
-		SUDO_CMD yum -y remove x11rdp >> $YUM_LOG || error_exit
-	fi
-
-	# clean /opt/X11rdp
-	if [ -d $X11RDPBASE ]; then
-		SUDO_CMD find $X11RDPBASE -delete
-	fi
-
-	# extract xrdp source
-	tar zxf ${SOURCE_DIR}/${DISTFILE} -C $WRKDIR || error_exit
-
-	# build x11rdp once into $X11RDPBASE
-	(
-	cd ${WRKDIR}/${WRKSRC}/xorg/X11R7.6 && \
-	sed -i.bak \
-		-e 's|if ! mkdir $PREFIX_DIR|if ! mkdir -p $PREFIX_DIR|' \
-		-e 's|wget -cq|wget -cq --retry-connrefused --waitretry=10|' \
-		-e "s|make -j 1|make -j $jobs|g" \
-		-e 's|^download_url=http://server1.xrdp.org/xrdp/X11R7.6|download_url=https://xrdp.vmeta.jp/pub/xrdp/X11R7.6|' \
-		buildx.sh >> $BUILD_LOG 2>&1 && \
-	SUDO_CMD ./buildx.sh $X11RDPBASE >> $BUILD_LOG 2>&1
-	) || error_exit
-
-	QA_RPATHS=$[0x0001|0x0002] rpmbuild -ba ${WRKDIR}/x11rdp.spec >> $BUILD_LOG 2>&1 || error_exit
-
-	# cleanup installed files during the build
-	if [ -d $X11RDPBASE ]; then
-		SUDO_CMD find $X11RDPBASE -delete
-	fi
-}
-
 rpmdev_setuptree()
 {
 	echo -n 'Setting up rpmbuild tree... '
@@ -340,7 +294,6 @@ build_rpm()
 		echo -n "Building ${f}... "
 		case "${f}" in
 			xrdp) QA_RPATHS=$[0x0001] rpmbuild -ba ${WRKDIR}/${f}.spec >> $BUILD_LOG 2>&1 || error_exit ;;
-			x11rdp) x11rdp_dirty_build || error_exit ;;
 			*) rpmbuild -ba ${WRKDIR}/${f}.spec >> $BUILD_LOG 2>&1 || error_exit ;;
 		esac
 		echo 'done'
@@ -366,10 +319,8 @@ OPTIONS
                        --branch devel   - use the devel branch (Bleeding Edge - may not work properly!)
                        Branches beginning with \"v\" are stable releases.
                        The master branch changes when xrdp authors merge changes from the devel branch.
-  --nocpuoptimize    : do not change X11rdp build script to utilize more than 1 of your CPU cores.
   --maintainer       : maintainer mode
   --noinstall        : do not install anything, just build the packages
-  --with-x11rdp      : build x11rdp (deprecated: replaced by xorgxrdp)
   --with-xorgxrdp    : build xorgxrdp (formerly known as xorg-driver)
   --with-xorg-driver : alias for --with-xorgxrdp
   --xorgxrdpdebug    : increase log level of xorgxrdp
@@ -408,19 +359,6 @@ OPTIONS
 
 		--noinstall)
 			INSTALL_XRDP=false
-			;;
-
-		--nocpuoptimize)
-			PARALLELMAKE=false
-			;;
-
-		--nox11rdp)
-			echo_stderr 'WARNING: x11rdp is no longer built by default.'
-			;;
-
-		--with-x11rdp)
-			TARGETS="$TARGETS x11rdp"
-			echo_stderr 'WARNING: x11rdp is deprecated, consider useing xorgxrdp instead'
 			;;
 
 		--with-xorg-driver) # alias for --with-xorgxrdp
@@ -473,11 +411,6 @@ get_branches()
 calc_cpu_cores()
 {
 	jobs=$(($(nproc) + 1))
-	if $PARALLELMAKE; then
-		makeCommand="make -j $jobs"
-	else
-		makeCommand="make -j 1"
-	fi
 }
 
 remove_installed_xrdp()
@@ -518,7 +451,6 @@ install_targets_depends()
 	for t in $TARGETS; do
 		case "$t" in
 			xrdp) install_depends $XRDP_BASIC_BUILD_DEPENDS $XRDP_ADDITIONAL_BUILD_DEPENDS;;
-			x11rdp) install_depends $X11RDP_BUILD_DEPENDS ;;
 			xorgxrdp) install_depends $XORGXRDP_BUILD_DEPENDS;;
 		esac
 	done

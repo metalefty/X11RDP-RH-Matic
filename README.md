@@ -3,7 +3,7 @@ X11RDP-RH-Matic  [![Build Status](https://travis-ci.org/metalefty/X11RDP-RH-Mati
 
 What is this?
 ----
-X11RDP-RH-Matic helps to build and install latest snapshot of [xrdp](https://github.com/neutrinolabs/xrdp), x11rdp, xorgxrdp (xorg-driver) for Red Hat Enterprise Linux or its clones.
+X11RDP-RH-Matic helps to build and install latest snapshot of [xrdp](https://github.com/neutrinolabs/xrdp), xorgxrdp (xorg-driver) for Red Hat Enterprise Linux or its clones.
 
 This utility is inspired by [X11RDP-o-Matic](https://github.com/scarygliders/X11RDP-o-Matic). In other words, Red Hat version of X11RDP-o-Matic.
 
@@ -28,7 +28,7 @@ $ ./X11RDP-RH-Matic.sh
 Adding these options is recommended now.
 
 ```
-$ ./X11RDP-RH-Matic.sh --with-xorg-driver --nox11rdp
+$ ./X11RDP-RH-Matic.sh --with-xorg-driver
 ```
 
 Use develop branch to try development snapshot.
@@ -73,11 +73,10 @@ TODOs
 Building xorgxrdp (formerly known as xorg-driver)
 ----
 X11RDP-RH-Matic can build xorgxrdp (aka xorg-driver). Run with `--with-xorg-driver`
-option. When you want to build xorgxrdp, probably you don't need X11rdp then also
-add `--nox11rdp` option.
+option. When you want to build xorgxrdp.
 
 ```
-$ ./X11RDP-RH-Matic.sh --with-xorgxrdp --nox11rdp
+$ ./X11RDP-RH-Matic.sh --with-xorgxrdp
 ```
 
 Contributing
