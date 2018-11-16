@@ -58,7 +58,6 @@ XRDP_CONFIGURE_ARGS="--enable-fuse --enable-jpeg --enable-ipv6 --disable-static"
 # flags
 INSTALL_XRDP=true   # install built package after build
 MAINTAINER=false    # maintainer mode
-IS_EL6=$([ "$(rpm --eval %{?rhel})" -le 6 ] && echo true || echo false)
 IS_EL7=$([ "$(rpm --eval %{?rhel})" -eq 7 ] && echo true || echo false)
 
 # substitutes
@@ -204,12 +203,6 @@ generate_spec()
 	-e "s|%%CONFIGURE_ARGS%%|${XRDP_CONFIGURE_ARGS}|g" \
 	${WRKDIR}/xrdp.spec || error_exit
 
-	if $IS_EL6; then
-		sed -i.bak \
-		-e 's|\(^BuildRequires:\s*\)\(autoconf\)|\1autoconf268|' \
-		${WRKDIR}/xrdp.spec || error_exit
-	fi
-
 	echo 'done'
 }
 
@@ -225,17 +218,6 @@ clone()
 		git clone ${GH_URL} --branch ${GH_BRANCH} ${WRKDIR}/${WRKSRC} >> $BUILD_LOG 2>&1 || error_exit
 		sed -i -e 's|git://|https://|' ${WRKDIR}/${WRKSRC}/.gitmodules ${WRKDIR}/${WRKSRC}/.git/config
 		(cd ${WRKDIR}/${WRKSRC} && git submodule update --init --recursive)  >> $BUILD_LOG 2>&1
-
-		if $IS_EL6; then
-			sed -i \
-				-e 's|librfxencode.a$|librfxencode.la|g' \
-				-e 's|libpainter.a$|libpainter.la|g' \
-				${WRKDIR}/${WRKSRC}/xrdp/Makefile.am
-			sed -i -e 's|autoreconf|autoreconf268|' \
-				${WRKDIR}/${WRKSRC}/bootstrap \
-				${WRKDIR}/${WRKSRC}/librfxcodec/bootstrap \
-				${WRKDIR}/${WRKSRC}/libpainter/bootstrap
-		fi
 
 
 		tar cfz ${WRKDIR}/${DISTFILE} -C ${WRKDIR} ${WRKSRC} || error_exit
@@ -257,10 +239,6 @@ clone()
 
   if [ ! -f ${SOURCE_DIR}/${DISTFILE_xorgxrdp} ]; then
 		git clone ${GH_URL_xorgxrdp} --branch ${GH_BRANCH_xorgxrdp} ${WRKDIR}/${WRKSRC_xorgxrdp} >> $BUILD_LOG 2>&1 || error_exit
-
-		if $IS_EL6; then
-			sed -i -e 's|autoreconf|autoreconf268|' ${WRKDIR}/${WRKSRC_xorgxrdp}/bootstrap
-		fi
 
 		tar cfz ${WRKDIR}/${DISTFILE_xorgxrdp} -C ${WRKDIR} ${WRKSRC_xorgxrdp} || error_exit
 		cp -a ${WRKDIR}/${DISTFILE_xorgxrdp} ${SOURCE_DIR}/${DISTFILE_xorgxrdp} || error_exit
@@ -489,16 +467,6 @@ first_of_all()
 		SUDO_CMD yum -y install yum-utils >> $YUM_LOG && echo "done" || exit 1
 	fi
 
-	if $IS_EL6; then
-		check_if_installed epel-release
-		if [ $? -ne 0 ]; then
-			echo "You are using $(cat /etc/redhat-release)."
-			echo '"epel-release" is needed to run this script.'
-			echo -n 'Installing epel-release...'
-			SUDO_CMD yum -y install epel-release >> $YUM_LOG && echo 'done' || exit 1
-		fi
-		XRDP_BASIC_BUILD_DEPENDS=${XRDP_BASIC_BUILD_DEPENDS/autoconf /autoconf268 }
-	fi
 }
 
 #

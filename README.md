@@ -50,17 +50,13 @@ distributions. It may work on other RHEL clone distribution such as Oracle Linux
 Please report if you confirmed it works.
 
 - Red Hat Enterprise Linux Server release 7.2 (Maipo)
-- CentOS release 6.5 (Final)
-- CentOS release 6.6 (Final) reported by Michael Niehren
 - CentOS Linux release 7.2.1511 (Core)
 - CentOS Linux release 7.3.1611 (Core)
-- Scientific Linux release 6.5 (Carbon)
 - Asianux Server release 7 SP1 (Lotus)
 
 Support policy
 ---
 X11RDP-RH-Matic supports the latest major version and one previous version of RHEL and its clones.
-That is 7.x and 6.x as of June 15, 2017.
 
 CentOS 7.0 and 7.1 is not supported due to TLSv1.2 or higher being required by GitHub.
 
